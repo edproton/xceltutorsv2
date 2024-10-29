@@ -1,5 +1,6 @@
 "use client";
 
+import { Toaster } from "../ui/toaster";
 import { ThemeProvider } from "./theme-provider";
 
 interface ProvidersProps {
@@ -7,5 +8,10 @@ interface ProvidersProps {
 }
 
 export default function Providers({ children }: ProvidersProps) {
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return (
+    <ThemeProvider>
+      {children}
+      <Toaster />
+    </ThemeProvider>
+  );
 }

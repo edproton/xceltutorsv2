@@ -119,9 +119,6 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <p className="text-lg sm:text-xl text-muted-foreground font-medium">
-              Where Excellence Begins with X
-            </p>
             <p className="text-base sm:text-lg text-muted-foreground">
               Xcelling in Education, Xceeding Expectations
             </p>
