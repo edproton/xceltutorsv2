@@ -1,90 +1,102 @@
-// utils/timezone.ts
 import { DateTime } from "luxon";
 
-export const ISO_TO_TIMEZONE: Record<number, string> = {
-  1: "America/New_York", // USA
-  7: "Asia/Bangkok", // Thailand
-  20: "Africa/Cairo", // Egypt
-  27: "Africa/Johannesburg", // South Africa
-  30: "Europe/Athens", // Greece
-  31: "Europe/Amsterdam", // Netherlands
-  32: "Europe/Brussels", // Belgium
-  33: "Europe/Paris", // France
-  34: "Europe/Madrid", // Spain
-  36: "Europe/Budapest", // Hungary
-  39: "Europe/Rome", // Italy
-  40: "Europe/Bucharest", // Romania
-  41: "Europe/Zurich", // Switzerland
-  43: "Europe/Vienna", // Austria
-  44: "Europe/London", // UK
-  45: "Europe/Copenhagen", // Denmark
-  46: "Europe/Stockholm", // Sweden
-  47: "Europe/Oslo", // Norway
-  48: "Europe/Warsaw", // Poland
-  49: "Europe/Berlin", // Germany
-  51: "America/Lima", // Peru
-  52: "America/Mexico_City", // Mexico
-  54: "America/Argentina/Buenos_Aires", // Argentina
-  55: "America/Sao_Paulo", // Brazil
-  56: "America/Santiago", // Chile
-  57: "America/Bogota", // Colombia
-  61: "Australia/Sydney", // Australia
-  64: "Pacific/Auckland", // New Zealand
-  81: "Asia/Tokyo", // Japan
-  82: "Asia/Seoul", // South Korea
-  84: "Asia/Ho_Chi_Minh", // Vietnam
-  86: "Asia/Shanghai", // China
-  91: "Asia/Kolkata", // India
-  92: "Asia/Karachi", // Pakistan
-  94: "Asia/Colombo", // Sri Lanka
-  95: "Asia/Yangon", // Myanmar
-  98: "Asia/Tehran", // Iran
-  156: "Asia/Shanghai", // China (alternate code)
-  166: "Asia/Jakarta", // Indonesia
-  351: "Europe/Lisbon", // Portugal
-  352: "Europe/Luxembourg", // Luxembourg
-  353: "Europe/Dublin", // Ireland
-  358: "Europe/Helsinki", // Finland
-  420: "Europe/Prague", // Czech Republic
-  421: "Europe/Bratislava", // Slovakia
-};
+export class TimeRange {
+  startTime: DateTime;
+  endTime: DateTime;
 
-export function convertToUTC(
-  time: string,
-  date: string,
-  countryIsoNum: number
-): string {
-  const timezone = ISO_TO_TIMEZONE[countryIsoNum] || "UTC";
-  const localDateTime = DateTime.fromFormat(
-    `${date} ${time}`,
-    "yyyy-MM-dd HH:mm",
-    {
-      zone: timezone,
+  constructor(startTime: DateTime, endTime: DateTime) {
+    this.startTime = startTime;
+    this.endTime = endTime;
+  }
+
+  localize(targetZone: string): TimeRange {
+    return new TimeRange(
+      this.startTime.setZone(targetZone),
+      this.endTime.setZone(targetZone)
+    );
+  }
+
+  generateHourlySlotsForDate(
+    requestedDate: DateTime,
+    targetZone: string
+  ): TimeRange[] {
+    const localizedStartTime = this.startTime.setZone(targetZone);
+    const localizedEndTime = this.endTime.setZone(targetZone);
+
+    const dayStart = DateTime.fromObject(
+      {
+        year: requestedDate.year,
+        month: requestedDate.month,
+        day: requestedDate.day,
+        hour: 0,
+        minute: 0,
+        second: 0,
+      },
+      { zone: targetZone }
+    );
+
+    const dayEnd = dayStart.plus({ days: 1 });
+
+    const hourlySlots: TimeRange[] = [];
+
+    let currentStart =
+      localizedStartTime > dayStart ? localizedStartTime : dayStart;
+    const currentEnd = localizedEndTime < dayEnd ? localizedEndTime : dayEnd;
+
+    while (currentStart < currentEnd) {
+      const nextHour = currentStart.plus({ hours: 1 });
+      let slotEnd = nextHour <= currentEnd ? nextHour : currentEnd;
+
+      // Check if the slot end time crosses into the next day at midnight
+      if (
+        slotEnd.hour === 0 &&
+        slotEnd.minute === 0 &&
+        slotEnd.day === currentStart.day + 1
+      ) {
+        slotEnd = slotEnd.minus({ minutes: 1 });
+        hourlySlots.push(new TimeRange(currentStart, slotEnd));
+        break;
+      }
+
+      hourlySlots.push(new TimeRange(currentStart, slotEnd));
+      currentStart = slotEnd;
     }
-  );
-  return localDateTime.toUTC().toFormat("HH:mm");
+
+    return hourlySlots;
+  }
+
+  toString(): string {
+    return `[${
+      this.startTime.weekdayLong
+    }] Start: ${this.startTime.toISO()}, [${
+      this.endTime.weekdayLong
+    }] End: ${this.endTime.toISO()}`;
+  }
 }
 
-export function convertFromUTC(
-  time: string,
-  date: string,
-  countryIsoNum: number
-): string {
-  const timezone = ISO_TO_TIMEZONE[countryIsoNum] || "UTC";
-  const utcDateTime = DateTime.fromFormat(
-    `${date} ${time}`,
-    "yyyy-MM-dd HH:mm",
-    {
-      zone: "UTC",
-    }
-  );
-  return utcDateTime.setZone(timezone).toFormat("HH:mm");
+export class Availability {
+  timeRanges: TimeRange[] = [];
+
+  constructor(timeRanges: TimeRange[] = []) {
+    this.timeRanges = timeRanges;
+  }
+
+  localize(targetZone: string): Availability {
+    return new Availability(
+      this.timeRanges.map((tr) => tr.localize(targetZone))
+    );
+  }
+
+  toUtc(): Availability {
+    return this.localize("UTC");
+  }
 }
 
-export function getTimezoneLabel(countryIsoNum: number): string {
-  const timezone = ISO_TO_TIMEZONE[countryIsoNum] || "UTC";
-  const now = DateTime.now().setZone(timezone);
-  const offset = now.toFormat("Z");
-  const abbr = now.toFormat("ZZZZ");
-  return `${timezone} (${abbr}, UTC${offset})`;
-}
+// Example usage:
+const startTime = DateTime.utc(2024, 11, 4, 9, 0); // Replace with actual DateTime
+const endTime = DateTime.utc(2024, 11, 4, 18, 0); // Replace with actual DateTime
+const timeRange = new TimeRange(startTime, endTime);
+
+const availability = new Availability([timeRange]);
+const localizedAvailability = availability.localize("Europe/Lisbon");
+console.log(localizedAvailability);
