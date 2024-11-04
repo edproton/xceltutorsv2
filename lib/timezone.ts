@@ -51,7 +51,7 @@ export class TimeRange {
       if (
         slotEnd.hour === 0 &&
         slotEnd.minute === 0 &&
-        slotEnd.day === currentStart.day + 1
+        slotEnd.day !== currentStart.day
       ) {
         slotEnd = slotEnd.minus({ minutes: 1 });
         hourlySlots.push(new TimeRange(currentStart, slotEnd));
