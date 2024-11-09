@@ -139,7 +139,13 @@ export default class TutorsRepository {
     };
   }
 
-  static async getTutors(pageNumber: number): Promise<PageResponse<Tutor>> {
+  static async getTutors(pageNumber: number): Promise<
+    PageResponse<
+      Tutor & {
+        prices: number[];
+      }
+    >
+  > {
     const client = createClient();
 
     // Fetch paginated tutor data with type safety
@@ -147,10 +153,16 @@ export default class TutorsRepository {
       .collection("tutors")
       .getList<TutorResponse>(pageNumber, 5, {
         sort: "-created",
-        expand: "tutor",
+        expand: "tutor, tutors_services_via_tutor",
+        fields: `
+          id,
+          metadata,
+          expand.tutor.name,
+          expand.tutor.id,
+          expand.tutor.avatar,
+          expand.tutors_services_via_tutor.price`,
       });
 
-    // Map the response items to the Tutor type
     return {
       page: response.page,
       perPage: response.perPage,
@@ -161,6 +173,9 @@ export default class TutorsRepository {
         name: item.expand.tutor.name,
         metadata: item.metadata,
         avatar: `${env.NEXT_PUBLIC_PB}/api/files/_pb_users_auth_/${item.expand.tutor.id}/${item.expand.tutor.avatar}`,
+        prices: item.expand.tutors_services_via_tutor.map(
+          (service) => service.price
+        ),
       })),
     };
   }

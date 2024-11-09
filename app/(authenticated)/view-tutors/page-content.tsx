@@ -10,12 +10,14 @@ import { PageResponse, Tutor } from "./tutors-repository";
 export default function ViewTutorsPage({
   tutors,
 }: {
-  tutors: PageResponse<Tutor>;
+  tutors: PageResponse<
+    Tutor & {
+      prices: number[];
+    }
+  >;
 }) {
   return (
     <div className="min-h-screen bg-background">
-      {" "}
-      {/* Added pt-14 to account for the fixed navbar */}
       <div className="bg-primary/5 py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Find Your Perfect Tutor</h1>

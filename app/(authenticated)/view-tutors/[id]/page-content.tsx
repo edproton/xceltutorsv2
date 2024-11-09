@@ -555,7 +555,7 @@ export default function ViewTutorsByIdPageContent({
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className="w-4 w-4 fill-primary text-primary"
+                              className="w-4 fill-primary text-primary"
                             />
                           ))}
                         </div>

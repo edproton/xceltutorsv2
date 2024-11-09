@@ -2,9 +2,23 @@ import { BookCheck, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tutor } from "../tutors-repository";
-import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+
+interface Tutor {
+  id: string;
+  name: string;
+  avatar: string;
+  metadata: {
+    bio: { short: string };
+    completedLessons: number;
+    reviews: number;
+    tags: string[];
+    degree: string;
+    university: string;
+  };
+  prices: number[];
+}
 
 interface TutorCardProps {
   tutor: Tutor;
@@ -28,11 +42,12 @@ export default function Component({
       degree,
       university,
     },
+    prices,
   },
 }: TutorCardProps) {
   return (
     <Link href={`/view-tutors/${id}`}>
-      <Card className="group w-full overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <Card className="group relative w-full overflow-hidden transition-all duration-300 hover:shadow-lg">
         <CardContent className="p-0">
           <div className="flex">
             <div className="relative w-1/4 min-w-[100px] max-w-[120px]">
@@ -100,6 +115,13 @@ export default function Component({
             </div>
           </div>
         </CardContent>
+        {/* Price badge */}
+        <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 rounded-bl-lg font-semibold">
+          {prices.length > 0 &&
+            (Math.min(...prices) === Math.max(...prices)
+              ? `£${Math.min(...prices)}/hr`
+              : `£${Math.min(...prices)} - £${Math.max(...prices)}/hr`)}
+        </div>
       </Card>
     </Link>
   );
