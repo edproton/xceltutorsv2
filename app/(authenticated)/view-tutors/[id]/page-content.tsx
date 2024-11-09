@@ -162,9 +162,12 @@ export default function ViewTutorsByIdPageContent({
       <Card className="overflow-hidden">
         <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
           <div className="text-center space-y-2">
-            <h3 className="font-semibold text-lg">Get in touch with Angel</h3>
+            <h3 className="font-semibold text-lg">
+              Get in touch with {name.split(" ")[0]}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Have a chat with Angel and see how (and when!) they can help
+              Have a chat with {name.split(" ")[0]} and see how (and when!) they
+              can help
             </p>
           </div>
           <TooltipProvider>
