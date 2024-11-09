@@ -159,30 +159,28 @@ export default function ViewTutorsByIdPageContent({
                 <AvatarImage src={avatar} alt={name} />
                 <AvatarFallback>AO</AvatarFallback>
               </Avatar>
-              <div className="flex-1 space-y-4">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-                  <div>
-                    <h1 className="text-3xl font-bold">{name}</h1>
-                    <p className="text-muted-foreground flex items-center flex-wrap gap-2 mt-1">
-                      <span className="flex items-center">
-                        <GraduationCap className="h-4 w-4 text-blue-500 mr-1" />
-                        {metadata.degree}
-                      </span>
-                      <span className="flex items-center">
-                        <MapPin className="h-4 w-4 text-red-500 mr-1" />
-                        {metadata.university}
-                      </span>
-                    </p>
+              <div className="flex items-center justify-between gap-4 w-full">
+                <div className="flex items-center gap-6">
+                  <h1 className="text-3xl font-bold">{name}</h1>
+                  <div className="flex items-center gap-4 text-muted-foreground">
+                    <span className="flex items-center">
+                      <GraduationCap className="h-4 w-4 text-blue-500 mr-1" />
+                      {metadata.degree}
+                    </span>
+                    <span className="flex items-center">
+                      <MapPin className="h-4 w-4 text-red-500 mr-1" />
+                      {metadata.university}
+                    </span>
                   </div>
-                  <Badge className="text-lg font-semibold px-3 py-1">
-                    {Math.min(...services.map((s) => s.price)) ===
-                    Math.max(...services.map((s) => s.price))
-                      ? `£${Math.min(...services.map((s) => s.price))}/hr`
-                      : `£${Math.min(
-                          ...services.map((s) => s.price)
-                        )} - £${Math.max(...services.map((s) => s.price))}/hr`}
-                  </Badge>
                 </div>
+                <Badge className="text-lg font-semibold px-3 py-1 shrink-0">
+                  {Math.min(...services.map((s) => s.price)) ===
+                  Math.max(...services.map((s) => s.price))
+                    ? `£${Math.min(...services.map((s) => s.price))}/hr`
+                    : `£${Math.min(
+                        ...services.map((s) => s.price)
+                      )} - £${Math.max(...services.map((s) => s.price))}/hr`}
+                </Badge>
               </div>
             </div>
             {/* About Section */}

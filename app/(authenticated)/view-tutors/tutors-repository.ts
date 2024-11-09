@@ -74,6 +74,10 @@ interface ServiceResponse {
   };
 }
 
+export type TutorWithPrices = Tutor & {
+  prices: number[];
+};
+
 export interface PageResponse<T> {
   page: number;
   perPage: number;
@@ -88,7 +92,6 @@ export default class TutorsRepository {
   ): Promise<TutorWithAvailabilityAndServices> {
     const client = createClient();
 
-    // Fetch tutor data with expanded back-relations
     const response = await client
       .collection("tutors")
       .getOne<TutorResponse>(id, {
@@ -109,7 +112,6 @@ export default class TutorsRepository {
       `,
       });
 
-    // Map services using expanded data
     const services = response.expand["tutors_services_via_tutor"].map(
       (service) => ({
         subject: service.expand.subject?.name ?? "Unknown Subject",
@@ -118,7 +120,6 @@ export default class TutorsRepository {
       })
     );
 
-    // Map availabilities
     const availabilities = response.expand[
       "tutors_availabilities_via_tutor"
     ].map((availability) => ({
@@ -128,7 +129,6 @@ export default class TutorsRepository {
       evening: availability.evening,
     }));
 
-    // Construct the result object
     return {
       id: response.id,
       name: response.expand.tutor.name,
@@ -139,16 +139,11 @@ export default class TutorsRepository {
     };
   }
 
-  static async getTutors(pageNumber: number): Promise<
-    PageResponse<
-      Tutor & {
-        prices: number[];
-      }
-    >
-  > {
+  static async getTutors(
+    pageNumber: number
+  ): Promise<PageResponse<TutorWithPrices>> {
     const client = createClient();
 
-    // Fetch paginated tutor data with type safety
     const response = await client
       .collection("tutors")
       .getList<TutorResponse>(pageNumber, 5, {

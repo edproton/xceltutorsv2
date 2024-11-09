@@ -4,24 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-
-interface Tutor {
-  id: string;
-  name: string;
-  avatar: string;
-  metadata: {
-    bio: { short: string };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    degree: string;
-    university: string;
-  };
-  prices: number[];
-}
+import { TutorWithPrices } from "../tutors-repository";
 
 interface TutorCardProps {
-  tutor: Tutor;
+  tutor: TutorWithPrices;
 }
 
 const tagColorMap: Record<string, string> = {
