@@ -17,6 +17,7 @@ import {
   GraduationCap,
   MapPin,
   Users,
+  Menu,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,7 +44,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { TutorWithAvailabilityAndServices } from "../tutors-repository";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const weekdayIndexMap = {
   Monday: 0,
@@ -148,32 +157,124 @@ export default function ViewTutorsByIdPageContent({
     }
   });
 
+  const Sidebar = () => (
+    <div className="space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto pr-4 hide-scrollbar">
+      <Card className="overflow-hidden">
+        <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
+          <div className="text-center space-y-2">
+            <h3 className="font-semibold text-lg">Get in touch with Angel</h3>
+            <p className="text-sm text-muted-foreground">
+              Have a chat with Angel and see how (and when!) they can help
+            </p>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-semibold transition-all duration-200 transform hover:scale-105"
+                  size="lg"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Get in touch
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Start a conversation with Angel</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full hover:bg-primary/5 transition-colors duration-200 ${
+                    isBookmarked ? "text-primary" : ""
+                  }`}
+                  size="lg"
+                  onClick={() => setIsBookmarked(!isBookmarked)}
+                >
+                  {isBookmarked ? (
+                    <Heart className="mr-2 h-4 w-4 fill-primary" />
+                  ) : (
+                    <Heart className="mr-2 h-4 w-4" />
+                  )}
+                  {isBookmarked ? "Saved" : "Save profile"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {isBookmarked
+                    ? "Remove from saved profiles"
+                    : "Save this profile for later"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardContent>
+      </Card>
+
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">Tutor Impact</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex flex-col items-center text-center">
+            <Star className="w-8 h-8 text-primary mb-2" />
+            <span className="text-2xl font-bold">4.9</span>
+            <span className="text-sm text-muted-foreground">
+              {metadata.reviews} reviews
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <Clock className="w-8 h-8 text-primary mb-2" />
+            <span className="text-2xl font-bold">
+              {metadata.completedLessons}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              Lessons completed
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <Users className="w-8 h-8 text-primary mb-2" />
+            <span className="text-2xl font-bold">{metadata.reviews - 15}</span>
+            <span className="text-sm text-muted-foreground">
+              Students helped
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row gap-6">
-              <Avatar className="h-32 w-32 rounded-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <Avatar className="h-32 w-32 rounded-lg border-4 border-background shadow-xl">
                 <AvatarImage src={avatar} alt={name} />
-                <AvatarFallback>AO</AvatarFallback>
+                <AvatarFallback className="rounded-none">
+                  <Skeleton className="h-full w-full" />
+                </AvatarFallback>
               </Avatar>
-              <div className="flex items-center justify-between gap-4 w-full">
-                <div className="flex items-center gap-6">
+              <div className="flex-1 space-y-4">
+                <div className="space-y-2">
                   <h1 className="text-3xl font-bold">{name}</h1>
-                  <div className="flex items-center gap-4 text-muted-foreground">
-                    <span className="flex items-center">
-                      <GraduationCap className="h-4 w-4 text-blue-500 mr-1" />
-                      {metadata.degree}
-                    </span>
-                    <span className="flex items-center">
-                      <MapPin className="h-4 w-4 text-red-500 mr-1" />
-                      {metadata.university}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <GraduationCap className="h-4 w-4 text-primary" />
+                      <span>{metadata.degree}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>{metadata.university}</span>
+                    </div>
                   </div>
                 </div>
-                <Badge className="text-lg font-semibold px-3 py-1 shrink-0">
+                <Badge className="text-lg font-semibold px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200">
                   {Math.min(...services.map((s) => s.price)) ===
                   Math.max(...services.map((s) => s.price))
                     ? `£${Math.min(...services.map((s) => s.price))}/hr`
@@ -571,98 +672,35 @@ export default function ViewTutorsByIdPageContent({
           {/* Sidebar */}
           <div className="lg:col-span-1 order-first lg:order-last">
             <div className="sticky top-20 z-40 space-y-6">
-              <Card className="overflow-hidden">
-                <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
-                  <div className="text-center space-y-2">
-                    <h3 className="font-semibold text-lg">
-                      Get in touch with Angel
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Have a chat with Angel and see how (and when!) they can
-                      help
-                    </p>
-                  </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-semibold transition-all duration-200 transform hover:scale-105"
-                          size="lg"
-                        >
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          Get in touch
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Start a conversation with Angel</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={`w-full hover:bg-primary/5 transition-colors duration-200 ${
-                            isBookmarked ? "text-primary" : ""
-                          }`}
-                          size="lg"
-                          onClick={() => setIsBookmarked(!isBookmarked)}
-                        >
-                          {isBookmarked ? (
-                            <Heart className="mr-2 h-4 w-4 fill-primary" />
-                          ) : (
-                            <Heart className="mr-2 h-4 w-4" />
-                          )}
-                          {isBookmarked ? "Saved" : "Save profile"}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          {isBookmarked
-                            ? "Remove from saved profiles"
-                            : "Save this profile for later"}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </CardContent>
-              </Card>
+              {/* Desktop Sidebar */}
+              <div className="hidden lg:block">
+                <Sidebar />
+              </div>
 
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">
-                    Tutor Impact
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex flex-col items-center text-center">
-                    <Star className="w-8 h-8 text-primary mb-2" />
-                    <span className="text-2xl font-bold">4.9</span>
-                    <span className="text-sm text-muted-foreground">
-                      {metadata.reviews} reviews
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <Clock className="w-8 h-8 text-primary mb-2" />
-                    <span className="text-2xl font-bold">
-                      {metadata.completedLessons}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      Lessons completed
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <Users className="w-8 h-8 text-primary mb-2" />
-                    <span className="text-2xl font-bold">
-                      {metadata.reviews - 15}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      Students helped
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Mobile Sidebar Toggle */}
+              <div className="lg:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg"
+                    >
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Toggle Sidebar</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-[300px] sm:w-[400px] overflow-y-auto"
+                  >
+                    <VisuallyHidden.Root>
+                      <SheetTitle>Tutor Information Sidebar</SheetTitle>
+                    </VisuallyHidden.Root>
+                    <Sidebar />
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           </div>
         </div>
