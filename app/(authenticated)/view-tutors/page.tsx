@@ -1,33 +1,32 @@
+import type { Metadata } from "next";
 import ViewTutorsPage from "./page-content";
 import { redirect } from "next/navigation";
 import TutorsRepository from "./tutors-repository";
-
-export interface Tutor {
-  id: string;
-  name: string;
-  degree: string;
-  reviews: number;
-  lessons: number;
-  tags: string[];
-  minHourlyRate: number;
-  maxHourlyRate: number;
-  bio: string;
-  avatar: string | null;
-}
-
-export interface TutorsResponse {
-  page: number;
-  perPage: number;
-  totalItems: number;
-  totalPages: number;
-  items: Tutor[];
-}
 
 type SearchParams = {
   page?: string;
 };
 
-const DEFAULT_PAGE = 1;
+export const metadata: Metadata = {
+  title: "View Our Tutors",
+  description:
+    "Browse through our list of qualified tutors and find the perfect match for your learning needs.",
+  openGraph: {
+    title: "View Our Tutors",
+    description:
+      "Find your ideal tutor from our extensive list of qualified professionals.",
+    type: "website",
+    url: "https://xceltutors.com/view-tutors",
+    images: [
+      {
+        url: "https://xceltutors.com/images/tutors-og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Our Tutors",
+      },
+    ],
+  },
+};
 
 export default async function ViewTutorsPageWrapper({
   searchParams,
@@ -48,5 +47,5 @@ export default async function ViewTutorsPageWrapper({
 
 function parsePageNumber(page: string | undefined): number {
   const parsedPage = parseInt(page ?? "", 10);
-  return isNaN(parsedPage) || parsedPage < 1 ? DEFAULT_PAGE : parsedPage;
+  return isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
 }
