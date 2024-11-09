@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu, User } from "lucide-react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, User } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function MainNav() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const routes = [
     {
@@ -41,7 +41,7 @@ export default function MainNav() {
       href: "/refer",
       label: "Refer a friend",
     },
-  ]
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -57,8 +57,11 @@ export default function MainNav() {
               <Link
                 key={route.href}
                 href={route.href}
-                className={`transition-colors hover:text-foreground/80 ${pathname === route.href ? "text-foreground" : "text-foreground/60"
-                  }`}
+                className={`transition-colors hover:text-foreground/80 ${
+                  pathname === route.href
+                    ? "text-foreground"
+                    : "text-foreground/60"
+                }`}
               >
                 {route.label}
               </Link>
@@ -98,15 +101,18 @@ export default function MainNav() {
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
             <Link href="/" className="flex items-center">
-              <span className="font-bold">MyTutor</span>
+              <span className="font-bold">xceltutors</span>
             </Link>
             <nav className="mt-8 flex flex-col space-y-3">
               {routes.map((route) => (
                 <Link
                   key={route.href}
                   href={route.href}
-                  className={`text-foreground/60 transition-colors hover:text-foreground ${pathname === route.href ? "text-foreground" : "text-foreground/60"
-                    }`}
+                  className={`text-foreground/60 transition-colors hover:text-foreground ${
+                    pathname === route.href
+                      ? "text-foreground"
+                      : "text-foreground/60"
+                  }`}
                 >
                   {route.label}
                 </Link>
@@ -116,5 +122,5 @@ export default function MainNav() {
         </Sheet>
       </div>
     </header>
-  )
+  );
 }

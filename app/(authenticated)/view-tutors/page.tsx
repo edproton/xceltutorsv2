@@ -39,8 +39,6 @@ export default async function ViewTutorsPageWrapper({
   const pageNumber = parsePageNumber(page);
   const tutors = await TutorsRepository.getTutors(pageNumber);
 
-  console.log(tutors);
-
   if (pageNumber > tutors.totalPages) {
     redirect(`/view-tutors?page=${tutors.totalPages}`);
   }

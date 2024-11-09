@@ -1,9 +1,10 @@
-import { Star } from "lucide-react";
+import { BookCheck, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tutor } from "../tutors-repository";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TutorCardProps {
   tutor: Tutor;
@@ -33,35 +34,31 @@ export default function Component({
     <Link href={`/view-tutors/${id}`}>
       <Card className="group w-full overflow-hidden transition-all duration-300 hover:shadow-lg">
         <CardContent className="p-0">
-          <div className="flex flex-col sm:flex-row">
-            <div className="relative w-full sm:w-1/4">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-75 transition-opacity duration-300 group-hover:opacity-100" />
-              <Avatar className="h-48 w-full rounded-none sm:h-full">
+          <div className="flex">
+            <div className="relative w-1/4 min-w-[100px] max-w-[120px]">
+              <Avatar className="h-full w-full rounded-none">
                 <AvatarImage
                   src={avatar}
                   alt={`Tutor ${name}`}
                   className="object-cover"
                 />
-                <AvatarFallback className="text-4xl">
-                  {name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                <AvatarFallback className="rounded-none">
+                  <Skeleton className="h-full w-full" />
                 </AvatarFallback>
               </Avatar>
             </div>
             <div className="flex flex-1 flex-col justify-between p-4">
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
-                  <h3 className="text-3xl font-bold tracking-tight text-foreground">
+                  <h3 className="text-xl font-bold tracking-tight text-foreground">
                     {name}
                   </h3>
-                  <p className="mt-1.5 text-base text-muted-foreground/80">
+                  <p className="text-sm text-muted-foreground/80">
                     {university} - {degree}
                   </p>
                 </div>
                 {tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1">
                     {tags.map((tag, index) => (
                       <Badge
                         key={index}
@@ -69,28 +66,37 @@ export default function Component({
                         className={`${
                           tagColorMap[tag] ||
                           "bg-secondary hover:bg-secondary/80"
-                        } text-secondary-foreground`}
+                        } text-secondary-foreground text-xs px-1.5 py-0.5`}
                       >
                         {tag}
                       </Badge>
                     ))}
                   </div>
                 )}
-                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-snug text-muted-foreground line-clamp-2">
                   {short}
                 </p>
               </div>
-              <div className="mt-6 flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  <span className="text-muted-foreground">
-                    {reviews} reviews
-                  </span>
+              {(reviews > 0 || completedLessons > 0) && (
+                <div className="mt-4 flex items-center text-center gap-4 text-xs">
+                  {reviews > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-primary text-primary" />
+                      <span className="text-muted-foreground">
+                        {reviews} reviews
+                      </span>
+                    </div>
+                  )}
+                  {completedLessons > 0 && (
+                    <div className="flex items-center  gap-1">
+                      <BookCheck className="h-3 w-3 text-primary" />
+                      <span className="text-muted-foreground">
+                        {completedLessons} lessons
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="text-muted-foreground">
-                  {completedLessons} lessons
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </CardContent>

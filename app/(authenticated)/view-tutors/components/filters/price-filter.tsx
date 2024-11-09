@@ -16,7 +16,7 @@ const priceRanges = [
     id: "25-32",
     range: "£25 - £32",
     description:
-      "New to MyTutor, with lots of availability and some great early reviews",
+      "New to xceltutors, with lots of availability and some great early reviews",
   },
   {
     id: "33-48",
@@ -32,7 +32,7 @@ const priceRanges = [
   },
 ];
 
-export function PriceFilter() {
+export default function PriceFilter() {
   const [open, setOpen] = React.useState(false);
   const [selectedPrices, setSelectedPrices] = React.useState<string[]>([]);
 

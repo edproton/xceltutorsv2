@@ -5,23 +5,72 @@ export interface Tutor {
   id: string;
   name: string;
   avatar: string;
-  metadata: {
-    bio: {
-      short: string;
-      main: string;
-      session: string;
+  metadata: TutorMetadata;
+}
+
+export interface TutorMetadata {
+  bio: {
+    short: string;
+    main: string;
+    session: string;
+  };
+  completedLessons: number;
+  reviews: number;
+  tags: string[];
+  trustedBySchools: boolean;
+  degree: string;
+  grades: Array<{
+    grade: string;
+    qualification: string;
+    subject: string;
+  }>;
+  university: string;
+}
+
+export interface TutorAvailability {
+  weekday: string;
+  morning: boolean;
+  afternoon: boolean;
+  evening: boolean;
+}
+
+export interface TutorServices {
+  subject: string;
+  level: string;
+  price: number;
+}
+
+export interface TutorWithAvailabilityAndServices extends Tutor {
+  services: TutorServices[];
+  availabilities: TutorAvailability[];
+}
+
+interface TutorResponse {
+  id: string;
+  metadata: TutorMetadata;
+  expand: {
+    tutor: {
+      id: string;
+      name: string;
+      avatar: string;
     };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    trustedBySchools: boolean;
-    degree: string;
-    grades: Array<{
-      grade: string;
-      qualification: string;
-      subject: string;
-    }>;
-    university: string;
+    tutors_availabilities_via_tutor: TutorAvailability[];
+    tutors_services_via_tutor: ServiceResponse[];
+  };
+}
+
+interface ServiceResponse {
+  id: string;
+  price: number;
+  expand: {
+    level: {
+      id: string;
+      name: string;
+    };
+    subject: {
+      id: string;
+      name: string;
+    };
   };
 }
 
@@ -33,43 +82,75 @@ export interface PageResponse<T> {
   items: T[];
 }
 
-interface TutorResponse {
-  id: string;
-  metadata: {
-    bio: {
-      short: string;
-      main: string;
-      session: string;
-    };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    trustedBySchools: boolean;
-    degree: string;
-    grades: Array<{
-      grade: string;
-      qualification: string;
-      subject: string;
-    }>;
-    university: string;
-  };
-  expand: {
-    tutor: {
-      id: string;
-      name: string;
-      avatar: string;
-    };
-  };
-}
-
 export default class TutorsRepository {
+  static async getTutorById(
+    id: string
+  ): Promise<TutorWithAvailabilityAndServices> {
+    const client = createClient();
+
+    // Fetch tutor data with expanded back-relations
+    const response = await client
+      .collection("tutors")
+      .getOne<TutorResponse>(id, {
+        expand:
+          "tutor,tutors_availabilities_via_tutor,tutors_services_via_tutor.level,tutors_services_via_tutor.subject",
+        fields: `
+        metadata,
+        expand.tutor.id,
+        expand.tutor.name,
+        expand.tutor.avatar,
+        expand.tutors_availabilities_via_tutor.weekday,
+        expand.tutors_availabilities_via_tutor.morning,
+        expand.tutors_availabilities_via_tutor.afternoon,
+        expand.tutors_availabilities_via_tutor.evening,
+        expand.tutors_services_via_tutor.price,
+        expand.tutors_services_via_tutor.expand.level.name,
+        expand.tutors_services_via_tutor.expand.subject.name
+      `,
+      });
+
+    // Map services using expanded data
+    const services = response.expand["tutors_services_via_tutor"].map(
+      (service) => ({
+        subject: service.expand.subject?.name ?? "Unknown Subject",
+        level: service.expand.level?.name ?? "Unknown Level",
+        price: service.price,
+      })
+    );
+
+    // Map availabilities
+    const availabilities = response.expand[
+      "tutors_availabilities_via_tutor"
+    ].map((availability) => ({
+      weekday: availability.weekday,
+      morning: availability.morning,
+      afternoon: availability.afternoon,
+      evening: availability.evening,
+    }));
+
+    // Construct the result object
+    return {
+      id: response.id,
+      name: response.expand.tutor.name,
+      avatar: `${env.NEXT_PUBLIC_PB}/api/files/_pb_users_auth_/${response.expand.tutor.id}/${response.expand.tutor.avatar}`,
+      metadata: response.metadata,
+      availabilities,
+      services,
+    };
+  }
+
   static async getTutors(pageNumber: number): Promise<PageResponse<Tutor>> {
     const client = createClient();
-    const response = (await client.collection("tutors").getList(pageNumber, 5, {
-      sort: "-created",
-      expand: "tutor",
-    })) as PageResponse<TutorResponse>;
 
+    // Fetch paginated tutor data with type safety
+    const response = await client
+      .collection("tutors")
+      .getList<TutorResponse>(pageNumber, 5, {
+        sort: "-created",
+        expand: "tutor",
+      });
+
+    // Map the response items to the Tutor type
     return {
       page: response.page,
       perPage: response.perPage,
