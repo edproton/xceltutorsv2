@@ -3,6 +3,7 @@ import { env } from "@/env/client";
 import PocketBase from "pocketbase";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { AUTH_COOKIE_NAME, COOKIE_MAX_AGE } from "@/lib/constants";
 
 // Types for better type safety
 interface OAuthCallbackParams {
@@ -16,8 +17,6 @@ const callbackParamsSchema = z.object({
 });
 
 // Constants
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
-const AUTH_COOKIE_NAME = "pb_auth";
 
 // Custom error class for OAuth errors
 class OAuthError extends Error {
@@ -53,6 +52,7 @@ const setupAuthCookie = (
     path: "/",
     maxAge: COOKIE_MAX_AGE,
   });
+
   return response;
 };
 
@@ -134,8 +134,12 @@ export async function GET(
 
     // Create successful response with auth cookie
     const response = createRedirectResponse("/dashboard");
+    const cookie = JSON.stringify({
+      token: authData.token,
+      record: authData.record,
+    });
 
-    return setupAuthCookie(response, pb.authStore.exportToCookie());
+    return setupAuthCookie(response, cookie);
   } catch (error) {
     // Enhanced error logging
     console.error("OAuth callback error:", {

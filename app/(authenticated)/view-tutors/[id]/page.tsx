@@ -24,7 +24,6 @@ export default async function ViewTutorsByIdPage({
   params,
 }: ViewTutorsByIdPageProps) {
   const { id } = await params;
-
   const tutor = await TutorsRepository.getTutorById(id);
 
   return <ViewTutorsByIdPageContent tutor={tutor} />;

@@ -1,5 +1,6 @@
 import { env } from "@/env/client";
 import { createClient } from "@/lib/pocket-base";
+import { getUserFromCookie } from "@/lib/auth";
 
 export interface Tutor {
   id: string;
@@ -87,10 +88,23 @@ export interface PageResponse<T> {
 }
 
 export default class TutorsRepository {
+  // Fetch the user data from the cookie
+  private static async getAuthenticatedClient() {
+    const client = await createClient();
+    const userData = await getUserFromCookie();
+
+    if (userData?.token) {
+      client.authStore.save(userData.token, userData);
+    }
+
+    return client;
+  }
+
+  // Get a tutor by ID with expanded availability and services
   static async getTutorById(
     id: string
   ): Promise<TutorWithAvailabilityAndServices> {
-    const client = createClient();
+    const client = await this.getAuthenticatedClient();
 
     const response = await client
       .collection("tutors")
@@ -139,23 +153,25 @@ export default class TutorsRepository {
     };
   }
 
+  // Get a paginated list of tutors with basic information and prices
   static async getTutors(
     pageNumber: number
   ): Promise<PageResponse<TutorWithPrices>> {
-    const client = createClient();
+    const client = await this.getAuthenticatedClient();
 
     const response = await client
       .collection("tutors")
       .getList<TutorResponse>(pageNumber, 5, {
         sort: "-created",
-        expand: "tutor, tutors_services_via_tutor",
+        expand: "tutor,tutors_services_via_tutor",
         fields: `
-          id,
-          metadata,
-          expand.tutor.name,
-          expand.tutor.id,
-          expand.tutor.avatar,
-          expand.tutors_services_via_tutor.price`,
+        id,
+        metadata,
+        expand.tutor.name,
+        expand.tutor.id,
+        expand.tutor.avatar,
+        expand.tutors_services_via_tutor.price
+      `,
       });
 
     return {
