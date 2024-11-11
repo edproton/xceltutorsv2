@@ -305,7 +305,7 @@ export default function ViewTutorsByIdPageContent({
                       isAboutExpanded ? "" : "line-clamp-2"
                     }`}
                   >
-                    {metadata.bio.main}
+                    {metadata.bio.full}
                   </p>
                 </motion.div>
                 {isAboutOverflowing && (
@@ -549,7 +549,7 @@ export default function ViewTutorsByIdPageContent({
                         className="hover:bg-primary/5 transition-colors duration-200"
                       >
                         <TableCell>{qual.subject}</TableCell>
-                        <TableCell>{qual.qualification}</TableCell>
+                        <TableCell>{qual.level}</TableCell>
                         <TableCell>{qual.grade}</TableCell>
                       </TableRow>
                     ))}

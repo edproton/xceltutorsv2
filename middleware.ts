@@ -1,36 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isTokenExpired } from "pocketbase";
-import { AUTH_COOKIE_NAME } from "./lib/constants";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/utils/supabase/middleware";
 
-export function middleware(request: NextRequest) {
-  const authCookie = request.cookies.get(AUTH_COOKIE_NAME);
-
-  // Extract the token from the cookie
-  const token = authCookie?.value ? JSON.parse(authCookie.value).token : null;
-
-  // Check if the token is missing or expired
-  if (!token || isTokenExpired(token)) {
-    // Get the current origin and requested path
-    const origin = request.nextUrl.origin;
-    const requestedPath = request.nextUrl.pathname;
-
-    // Construct a safe redirect URL with the current origin
-    const redirectUrl = new URL("/auth", origin);
-
-    // Optionally, include a 'redirectTo' query parameter to return the user to the requested path after login
-    redirectUrl.searchParams.set("redirectTo", requestedPath);
-
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Allow the request to proceed
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
 }
 
-// Configuration with matcher
 export const config = {
   matcher: [
-    "/messages/:path*", // Protect /messages and any sub-routes
-    "/view-tutors/:path*", // Protect /view-tutors and any sub-routes
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

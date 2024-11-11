@@ -1,6 +1,4 @@
-import { env } from "@/env/client";
-import { createClient } from "@/lib/pocket-base";
-import { getUserFromCookie } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 
 export interface Tutor {
   id: string;
@@ -11,18 +9,18 @@ export interface Tutor {
 
 export interface TutorMetadata {
   bio: {
+    full: string;
     short: string;
-    main: string;
     session: string;
   };
   completedLessons: number;
   reviews: number;
   tags: string[];
-  trustedBySchools: boolean;
+  trustedBySchools: boolean | null;
   degree: string;
   grades: Array<{
     grade: string;
-    qualification: string;
+    level: string;
     subject: string;
   }>;
   university: string;
@@ -46,35 +44,6 @@ export interface TutorWithAvailabilityAndServices extends Tutor {
   availabilities: TutorAvailability[];
 }
 
-interface TutorResponse {
-  id: string;
-  metadata: TutorMetadata;
-  expand: {
-    tutor: {
-      id: string;
-      name: string;
-      avatar: string;
-    };
-    tutors_availabilities_via_tutor: TutorAvailability[];
-    tutors_services_via_tutor: ServiceResponse[];
-  };
-}
-
-interface ServiceResponse {
-  id: string;
-  price: number;
-  expand: {
-    level: {
-      id: string;
-      name: string;
-    };
-    subject: {
-      id: string;
-      name: string;
-    };
-  };
-}
-
 export type TutorWithPrices = Tutor & {
   prices: number[];
 };
@@ -88,106 +57,187 @@ export interface PageResponse<T> {
 }
 
 export default class TutorsRepository {
-  // Fetch the user data from the cookie
-  private static async getAuthenticatedClient() {
-    const client = await createClient();
-    const userData = await getUserFromCookie();
-
-    if (userData?.token) {
-      client.authStore.save(userData.token, userData);
-    }
-
-    return client;
-  }
-
   // Get a tutor by ID with expanded availability and services
   static async getTutorById(
     id: string
   ): Promise<TutorWithAvailabilityAndServices> {
-    const client = await this.getAuthenticatedClient();
+    const client = await createClient();
 
-    const response = await client
-      .collection("tutors")
-      .getOne<TutorResponse>(id, {
-        expand:
-          "tutor,tutors_availabilities_via_tutor,tutors_services_via_tutor.level,tutors_services_via_tutor.subject",
-        fields: `
+    // Step 1: Fetch paginated data with related profiles
+    const tutorQuery = await client
+      .from("tutors")
+      .select(
+        `
+        id,
         metadata,
-        expand.tutor.id,
-        expand.tutor.name,
-        expand.tutor.avatar,
-        expand.tutors_availabilities_via_tutor.weekday,
-        expand.tutors_availabilities_via_tutor.morning,
-        expand.tutors_availabilities_via_tutor.afternoon,
-        expand.tutors_availabilities_via_tutor.evening,
-        expand.tutors_services_via_tutor.price,
-        expand.tutors_services_via_tutor.expand.level.name,
-        expand.tutors_services_via_tutor.expand.subject.name
-      `,
-      });
+        profiles (name, avatar),
+        tutors_services (
+          price,
+          levels (name, subjects (name))
+        ),
+        tutors_availabilities (weekday, morning, afternoon, evening)
+      `
+      )
+      .eq("id", id)
+      .single();
 
-    const services = response.expand["tutors_services_via_tutor"].map(
-      (service) => ({
-        subject: service.expand.subject?.name ?? "Unknown Subject",
-        level: service.expand.level?.name ?? "Unknown Level",
-        price: service.price,
-      })
-    );
+    if (tutorQuery.error) {
+      throw new Error(`Failed to fetch data: ${tutorQuery.error.message}`);
+    }
+    console.log(tutorQuery.data);
 
-    const availabilities = response.expand[
-      "tutors_availabilities_via_tutor"
-    ].map((availability) => ({
-      weekday: availability.weekday,
-      morning: availability.morning,
-      afternoon: availability.afternoon,
-      evening: availability.evening,
-    }));
+    // Map availabilities to the required structure
+    const response = tutorQuery.data;
 
-    return {
-      id: response.id,
-      name: response.expand.tutor.name,
-      avatar: `${env.NEXT_PUBLIC_PB}/api/files/_pb_users_auth_/${response.expand.tutor.id}/${response.expand.tutor.avatar}`,
-      metadata: response.metadata,
-      availabilities,
-      services,
+    const metadata = tutorQuery.data.metadata as {
+      bio: {
+        full: string;
+        short: string;
+        session: string;
+      };
+      tags: string[];
+      degree: string;
+      grades: Array<{
+        grade: string;
+        level: string;
+        subject: string;
+      }>;
+      reviews: number;
+      university: string;
+      completed_lessons: number;
+      trusted_by_schools: boolean;
     };
+
+    // Map the response to the expected structure
+    const tutorWithDetails = {
+      id: response.id,
+      name: response.profiles?.name ?? "Unknown Tutor",
+      avatar: response.profiles?.avatar ?? "",
+      metadata: {
+        bio: {
+          full: metadata.bio.full ?? "",
+          short: metadata.bio.short ?? "",
+          session: metadata.bio.session ?? "",
+        },
+        completedLessons: metadata.completed_lessons ?? 0,
+        reviews: metadata.reviews ?? 0,
+        tags: metadata.tags ?? [],
+        trustedBySchools: metadata.trusted_by_schools ?? false,
+        degree: metadata.degree ?? "",
+        grades: metadata.grades.map((grade) => ({
+          grade: grade.grade,
+          level: grade.level,
+          subject: grade.subject,
+        })),
+        university: metadata.university ?? "",
+      },
+      services: response.tutors_services.map((service) => ({
+        subject: service.levels?.subjects?.name ?? "Unknown Subject",
+        level: service.levels?.name ?? "Unknown Level",
+        price: service.price,
+      })),
+      availabilities: response.tutors_availabilities.map((availability) => ({
+        weekday: availability.weekday,
+        morning: availability.morning,
+        afternoon: availability.afternoon,
+        evening: availability.evening,
+      })),
+    };
+
+    return tutorWithDetails;
   }
 
-  // Get a paginated list of tutors with basic information and prices
   static async getTutors(
     pageNumber: number
   ): Promise<PageResponse<TutorWithPrices>> {
-    const client = await this.getAuthenticatedClient();
+    const client = await createClient();
 
-    const response = await client
-      .collection("tutors")
-      .getList<TutorResponse>(pageNumber, 5, {
-        sort: "-created",
-        expand: "tutor,tutors_services_via_tutor",
-        fields: `
+    const perPage = 5; // Fixed page size
+    const offset = (pageNumber - 1) * perPage;
+
+    // Step 1: Fetch paginated data with related profiles
+    const tutorsQuery = await client
+      .from("tutors")
+      .select(
+        `
         id,
         metadata,
-        expand.tutor.name,
-        expand.tutor.id,
-        expand.tutor.avatar,
-        expand.tutors_services_via_tutor.price
-      `,
-      });
+        profiles (name, avatar),
+        tutors_services (price)
+      `
+      )
+      .order("created_at", { ascending: false })
+      .range(offset, offset + perPage - 1);
 
+    if (tutorsQuery.error) {
+      throw new Error(`Failed to fetch data: ${tutorsQuery.error.message}`);
+    }
+
+    // Step 2: Get total count of items
+    const { count, error: countError } = await client
+      .from("tutors")
+      .select("id", { count: "exact", head: true });
+
+    if (countError) {
+      throw new Error(`Failed to fetch count: ${countError.message}`);
+    }
+
+    // Step 3: Calculate pagination metadata
+    const totalItems = count || 0;
+    const totalPages = Math.ceil(totalItems / perPage);
+
+    // Type-safe data mapping
     return {
-      page: response.page,
-      perPage: response.perPage,
-      totalItems: response.totalItems,
-      totalPages: response.totalPages,
-      items: response.items.map((item) => ({
-        id: item.id,
-        name: item.expand.tutor.name,
-        metadata: item.metadata,
-        avatar: `${env.NEXT_PUBLIC_PB}/api/files/_pb_users_auth_/${item.expand.tutor.id}/${item.expand.tutor.avatar}`,
-        prices: item.expand.tutors_services_via_tutor.map(
-          (service) => service.price
-        ),
-      })),
+      page: pageNumber,
+      perPage: perPage,
+      totalItems: totalItems,
+      totalPages: totalPages,
+      items: tutorsQuery.data.map((item) => {
+        const metadata = item.metadata as {
+          bio: {
+            full: string;
+            short: string;
+            session: string;
+          };
+          tags: string[];
+          degree: string;
+          grades: Array<{
+            grade: string;
+            level: string;
+            subject: string;
+          }>;
+          reviews: number;
+          university: string;
+          completed_lessons: number;
+          trusted_by_schools: boolean;
+        };
+
+        return {
+          id: item.id,
+          name: item.profiles?.name ?? "Unknown Tutor",
+          avatar: item.profiles?.avatar ?? "",
+          prices: item.tutors_services.map((service) => service.price),
+          metadata: {
+            bio: {
+              full: metadata?.bio?.full ?? "",
+              short: metadata?.bio?.short ?? "",
+              session: metadata?.bio?.session ?? "",
+            },
+            completedLessons: metadata?.completed_lessons ?? 0,
+            reviews: metadata?.reviews ?? 0,
+            tags: metadata?.tags ?? [],
+            trustedBySchools: metadata?.trusted_by_schools ?? false,
+            degree: metadata?.degree ?? "",
+            grades:
+              metadata?.grades?.map((grade) => ({
+                grade: grade.grade,
+                level: grade.level,
+                subject: grade.subject,
+              })) ?? [],
+            university: metadata?.university ?? "",
+          },
+        };
+      }),
     };
   }
 }

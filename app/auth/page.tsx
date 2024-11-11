@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { loadOAuthProviders } from "./actions";
 import AuthPage from "./auth-page";
 
 export const metadata: Metadata = {
@@ -24,11 +23,5 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LoginPageWrapper() {
-  const providers = await loadOAuthProviders();
-
-  if (!providers || !providers.data?.authProviders) {
-    return <div>Not found</div>;
-  }
-
-  return <AuthPage authProviders={providers.data!.authProviders} />;
+  return <AuthPage />;
 }

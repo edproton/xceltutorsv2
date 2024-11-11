@@ -58,7 +58,7 @@ export default function Component({
                     {university} - {degree}
                   </p>
                 </div>
-                {tags?.length > 0 && (
+                {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {tags.map((tag, index) => (
                       <Badge

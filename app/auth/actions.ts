@@ -1,40 +1,29 @@
 "use server";
 
-import PocketBase from "pocketbase";
-import { actionClient } from "@/lib/safe-action";
 import { env } from "@/env/client";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { type Provider } from "@supabase/supabase-js";
 
-const pb = new PocketBase(env.NEXT_PUBLIC_PB);
+export async function signInWithOAuth(formData: FormData) {
+  const provider = formData.get("provider") as Provider;
+  console.log(provider);
+  console.log("env", env.NEXT_PUBLIC_APP_URL);
 
-export const loadOAuthProviders = actionClient.action(async () => {
-  const oauthMethods = await pb.collection("users").listAuthMethods();
-
-  return oauthMethods;
-});
-
-export async function handleOAuthRedirect(formData: FormData) {
-  const providerJson = formData.get("provider") as string;
-  const provider = JSON.parse(providerJson);
-
-  // Construct the auth URL server-side
-  const authUrl = new URL(provider.authUrl);
-  authUrl.searchParams.set(
-    "redirect_uri",
-    `${env.NEXT_PUBLIC_APP_URL}/api/auth/${provider.name}/callback`
-  );
-
-  // Set the cookie server-side
-  (
-    await // Set the cookie server-side
-    cookies()
-  ).set(`${provider.name}_verifier`, provider.codeVerifier, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+  const client = await createClient();
+  const { data, error } = await client.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
   });
 
-  // Redirect to the constructed OAuth provider URL
-  redirect(authUrl.toString());
+  if (error) {
+    console.error("error", error);
+    return;
+  }
+
+  if (data.url) {
+    redirect(data.url); // use the redirect API for your server framework
+  }
 }

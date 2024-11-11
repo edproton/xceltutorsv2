@@ -3,10 +3,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
-import { handleOAuthRedirect } from "./actions";
-import { AuthProviderInfo } from "pocketbase";
+import { signInWithOAuth } from "./actions";
 import DiscordIcon from "@/components/icons/discord-icon";
 import GoogleIcon from "@/components/icons/google-icon";
+import providers from "./providers";
 
 const ProviderIcons: Record<
   string,
@@ -16,17 +16,13 @@ const ProviderIcons: Record<
   discord: DiscordIcon,
 };
 
-interface AuthPageProps {
-  authProviders: Array<AuthProviderInfo>;
-}
-
 const buttonVariants = {
   initial: { scale: 1, y: 0 },
   hover: { scale: 1.05, y: -2 },
   tap: { scale: 0.95, y: 0 },
 };
 
-export default function AuthPage({ authProviders }: AuthPageProps) {
+export default function AuthPage() {
   return (
     <>
       <motion.h2
@@ -38,22 +34,18 @@ export default function AuthPage({ authProviders }: AuthPageProps) {
         Continue with
       </motion.h2>
       <AnimatePresence>
-        {authProviders.toReversed().map((provider, index) => {
-          const Icon = ProviderIcons[provider.name];
+        {providers.toReversed().map((provider, index) => {
+          const Icon = ProviderIcons[provider];
           return (
             <motion.div
-              key={provider.name}
+              key={provider}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
             >
-              <form action={handleOAuthRedirect} className="w-full">
-                <input
-                  type="hidden"
-                  name="provider"
-                  value={JSON.stringify(provider)}
-                />
+              <form action={signInWithOAuth} className="w-full">
+                <input type="hidden" name="provider" value={provider} />
                 <motion.button
                   type="submit"
                   className="w-full flex items-center justify-center gap-2 h-10 sm:h-12 px-4 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
@@ -68,7 +60,7 @@ export default function AuthPage({ authProviders }: AuthPageProps) {
                   }}
                 >
                   {Icon && <Icon className="w-5 h-5" />}
-                  <span className="ml-2">{provider.displayName}</span>
+                  <span className="ml-2">{provider}</span>
                 </motion.button>
               </form>
             </motion.div>
