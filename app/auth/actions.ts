@@ -1,9 +1,9 @@
 "use server";
 
-import { env } from "@/env/env";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { type Provider } from "@supabase/supabase-js";
+import env from "@/env";
 
 export async function signInWithOAuth(formData: FormData) {
   const provider = formData.get("provider") as Provider;
