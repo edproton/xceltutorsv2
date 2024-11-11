@@ -7,10 +7,8 @@ import env from "@/env";
 
 export async function signInWithOAuth(formData: FormData) {
   const provider = formData.get("provider") as Provider;
-  console.log(provider);
-  console.log("env", env.NEXT_PUBLIC_APP_URL);
-
   const client = await createClient();
+
   const { data, error } = await client.auth.signInWithOAuth({
     provider,
     options: {
@@ -24,7 +22,6 @@ export async function signInWithOAuth(formData: FormData) {
   }
 
   if (data.url) {
-    console.log("redirecting to", `${data.url}`);
-    redirect(`${data.url}`); // use the redirect API for your server framework
+    redirect(data.url);
   }
 }
