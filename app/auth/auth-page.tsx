@@ -34,7 +34,7 @@ export default function AuthPage() {
         Continue with
       </motion.h2>
       <AnimatePresence>
-        {providers.toReversed().map((provider, index) => {
+        {providers.map((provider, index) => {
           const Icon = ProviderIcons[provider];
           return (
             <motion.div
@@ -60,7 +60,9 @@ export default function AuthPage() {
                   }}
                 >
                   {Icon && <Icon className="w-5 h-5" />}
-                  <span className="ml-2">{provider}</span>
+                  <span>
+                    {provider.charAt(0).toUpperCase() + provider.slice(1)}
+                  </span>
                 </motion.button>
               </form>
             </motion.div>
