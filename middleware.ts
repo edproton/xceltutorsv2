@@ -13,8 +13,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - Root path "/"
-     * - Auth paths "/auth" (including any sub-paths like "/auth/*")
+     * - Auth paths "/auth" and "/auth/*"
+     * - Auth callback path "/auth/callback"
      */
-    "/((?!_next/static|_next/image|favicon.ico|auth(?:/.*)?|$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|auth(?:/callback|/.*)?|$).*)",
   ],
 };
