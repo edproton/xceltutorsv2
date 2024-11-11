@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          created_at: string | null
+          from_profile_id: string | null
+          id: number
+          last_message: string | null
+          last_message_at: string
+          to_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          from_profile_id?: string | null
+          id?: number
+          last_message?: string | null
+          last_message_at?: string
+          to_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          from_profile_id?: string | null
+          id?: number
+          last_message?: string | null
+          last_message_at?: string
+          to_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_from_profile_id_fkey"
+            columns: ["from_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_to_profile_id_fkey"
+            columns: ["to_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       levels: {
         Row: {
           id: number
@@ -31,6 +73,48 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: number | null
+          created_at: string | null
+          from_profile_id: string | null
+          id: number
+          is_read: boolean
+        }
+        Insert: {
+          content: string
+          conversation_id?: number | null
+          created_at?: string | null
+          from_profile_id?: string | null
+          id?: number
+          is_read?: boolean
+        }
+        Update: {
+          content?: string
+          conversation_id?: number | null
+          created_at?: string | null
+          from_profile_id?: string | null
+          id?: number
+          is_read?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_from_profile_id_fkey"
+            columns: ["from_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
