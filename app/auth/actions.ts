@@ -23,7 +23,10 @@ export async function signInWithOAuth(formData: FormData) {
     return;
   }
 
+  console.log("Logged in");
+
   if (data.url) {
-    redirect(data.url); // use the redirect API for your server framework
+    console.log("redirecting to", `${data.url}`);
+    redirect(`${data.url}/dashboard`); // use the redirect API for your server framework
   }
 }
