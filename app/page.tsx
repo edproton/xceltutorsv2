@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import LandingPage from "./landing-page";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "XcelTutors - Personalized Tutoring to Help You Excel",
@@ -35,6 +36,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LandingPageWrapper() {
-  return <LandingPage />;
+export default async function LandingPageWrapper() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return <LandingPage isLoggedIn={!!user} />;
 }

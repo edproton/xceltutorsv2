@@ -35,7 +35,11 @@ const features = [
   { icon: Clock, text: "Flexible Scheduling" },
 ];
 
-export default function LandingPage() {
+interface LandingPageProps {
+  isLoggedIn: boolean;
+}
+
+export default function LandingPage({ isLoggedIn }: LandingPageProps) {
   const [subjectIndex, setSubjectIndex] = useState(0);
   const [currentColor, setCurrentColor] = useState("#ff5722");
   const [showSubjects, setShowSubjects] = useState(false);
@@ -98,8 +102,13 @@ export default function LandingPage() {
           }}
           className="flex justify-end items-center gap-2"
         >
-          <Link href="/auth" className="flex items-center">
-            <Button variant="outline">Login</Button>
+          <Link
+            href={isLoggedIn ? "/dashboard" : "/auth"}
+            className="flex items-center"
+          >
+            <Button variant={isLoggedIn ? "success" : "default"}>
+              {isLoggedIn ? "Dashboard" : "Login"}
+            </Button>
           </Link>
           <ThemeToggle />
         </motion.div>
