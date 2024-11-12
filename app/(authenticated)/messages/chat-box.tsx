@@ -458,13 +458,16 @@ export default function ChatBox({
               >
                 <div className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage
-                      src={otherProfile.avatar}
-                      alt={otherProfile.name}
-                    />
-                    <AvatarFallback>
-                      {otherProfile.name.charAt(0)}
-                    </AvatarFallback>
+                    {otherProfile.avatar && otherProfile.avatar !== "" ? (
+                      <AvatarImage
+                        src={otherProfile.avatar}
+                        alt={otherProfile.name}
+                      />
+                    ) : (
+                      <AvatarFallback>
+                        {otherProfile.name.charAt(0)}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline">
@@ -518,13 +521,16 @@ export default function ChatBox({
                 return (
                   <>
                     <Avatar>
-                      <AvatarImage
-                        src={otherProfile.avatar}
-                        alt={otherProfile.name}
-                      />
-                      <AvatarFallback>
-                        {otherProfile.name.charAt(0)}
-                      </AvatarFallback>
+                      {otherProfile.avatar && otherProfile.avatar !== "" ? (
+                        <AvatarImage
+                          src={otherProfile.avatar}
+                          alt={otherProfile.name}
+                        />
+                      ) : (
+                        <AvatarFallback>
+                          {otherProfile.name.charAt(0)}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div className="flex items-center gap-3">
                       <h2 className="text-lg font-semibold">
