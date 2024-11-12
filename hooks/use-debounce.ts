@@ -1,21 +1,14 @@
-import { useCallback, useRef } from "react";
+import debounce from "@/lib/helpers/debounce";
+import { useCallback } from "react";
 
 export default function useDebounce<T extends (...args: any[]) => any>(
-    callback: T,
-    delay: number
-  ): (...args: Parameters<T>) => void {
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  callback: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  const debouncedCallback = useCallback(debounce(callback, delay), [callback, delay]);
+
+  return debouncedCallback;
+}
+
+
   
-    return useCallback(
-      (...args: Parameters<T>) => {
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-  
-        timeoutRef.current = setTimeout(() => {
-          callback(...args);
-        }, delay);
-      },
-      [callback, delay]
-    );
-  }

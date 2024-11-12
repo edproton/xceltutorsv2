@@ -3,6 +3,7 @@ import { Check, CheckCheck, ChevronDown } from "lucide-react";
 import { Message } from "./messages";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
+import debounce from "@/lib/helpers/debounce";
 
 type MessageListProps = {
   messages: Message[];
@@ -52,7 +53,8 @@ const MessageList = memo(function MessageList({
   }, [messages, currentUserId, otherPersonName]);
 
   const debouncedOnMessageInView = useCallback(
-    debounce((messageId: number) => {
+    debounce((...args: unknown[]) => {
+      const messageId = args[0] as number;
       onMessageInView(messageId);
     }, 300),
     [onMessageInView]
@@ -224,19 +226,3 @@ const MessageList = memo(function MessageList({
 });
 
 export default MessageList;
-
-function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number
-): T {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-
-  return function (this: any, ...args: Parameters<T>) {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => {
-      func.apply(this, args);
-    }, wait);
-  } as T;
-}

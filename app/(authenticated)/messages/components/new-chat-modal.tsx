@@ -125,12 +125,12 @@ export default function NewChatModal({
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-muted-foreground">
               <p className="text-lg mb-2">👋 Welcome to your chat space!</p>
               <p className="text-sm">
-                🔍 Search for your tutor or classmate by name to start a new
-                conversation.
+                {`🔍 Search for your tutor or classmate by name to start a new
+                conversation.`}
               </p>
               <p className="text-sm mt-2">
-                💡 Tip: Try searching for a partial name if you're not sure of
-                the full spelling.
+                {`💡 Tip: Try searching for a partial name if you're not sure of
+                the full spelling.`}
               </p>
             </div>
           ) : profiles.length > 0 ? (
@@ -161,7 +161,7 @@ export default function NewChatModal({
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-              No profiles found for "{searchQuery}"
+              {`No profiles found for "${searchQuery}"`}
             </div>
           )}
         </div>
