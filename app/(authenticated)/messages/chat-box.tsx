@@ -407,8 +407,13 @@ export default function ChatBox({
                     onClick={() => startNewConversation(profile)}
                   >
                     <Avatar>
-                      <AvatarImage src={profile.avatar} alt={profile.name} />
-                      <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                      {profile.avatar && profile.avatar !== "" ? (
+                        <AvatarImage src={profile.avatar} alt={profile.name} />
+                      ) : (
+                        <AvatarFallback>
+                          {profile.name.charAt(0)}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div className="flex-1">
                       <p className="font-medium">{profile.name}</p>
