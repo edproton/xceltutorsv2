@@ -1,19 +1,17 @@
 export type Profile = {
   id: string;
   name: string;
+  avatar: string;
 };
 
-export type ConversationWithProfiles = {
+export type ConversationWithUnreadCount = {
   id: number;
-  from_profile: {
-    id: string;
-    name: string | null;
-  };
-  to_profile: {
-    id: string;
-    name: string | null;
-  };
+  from_profile: Profile;
+  to_profile: Profile;
+  last_message: string;
   last_message_at: string;
+  unread_count: number;
+  unread_message_ids: number[];
 };
 
 export type Message = {

@@ -1,10 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import ChatButton from "./chat-button";
-import { ConversationWithProfiles, Profile } from "./types";
+import { ConversationWithUnreadCount, Profile } from "./types";
+import MessagePageClient from "./message-page-client";
+
+// Update the type definition to match the actual structure returned by Supabase
+type ConversationData = {
+  id: number;
+  from_profile: Profile | null;
+  to_profile: Profile | null;
+  last_message: string | null;
+  last_message_at: string;
+  messages: { id: number; is_read: boolean; from_profile_id: string }[];
+};
 
 export default async function MessagePage() {
   const supabase = await createClient();
@@ -20,26 +26,30 @@ export default async function MessagePage() {
     );
   }
 
-  const currentUser = userData.user;
-  const currentUserName = currentUser.user_metadata.full_name as string;
+  const currentUser: Profile = {
+    id: userData.user.id,
+    name: userData.user.user_metadata.full_name || "Unknown",
+    avatar: userData.user.user_metadata.avatar_url || "",
+  };
 
   // Fetch conversations
-  const { data: conversations, error: conversationsError } = await supabase
+  const { data: conversationsData, error: conversationsError } = await supabase
     .from("conversations")
     .select(
       `
       id,
-      from_profile:from_profile_id (id, name),
-      to_profile:to_profile_id (id, name),
-      last_message_at
+      from_profile:profiles!conversations_from_profile_id_fkey (id, name, avatar),
+      to_profile:profiles!conversations_to_profile_id_fkey (id, name, avatar),
+      last_message,
+      last_message_at,
+      messages!inner (id, is_read, from_profile_id)
     `
     )
     .or(
       `from_profile_id.eq.${currentUser.id},to_profile_id.eq.${currentUser.id}`
     )
-    .returns<ConversationWithProfiles[]>();
+    .order("last_message_at", { ascending: false });
 
-  console.log(conversations);
   if (conversationsError) {
     return (
       <div className="text-red-500 p-4 bg-red-50 rounded-md">
@@ -48,13 +58,65 @@ export default async function MessagePage() {
     );
   }
 
-  // Fetch profiles
-  const { data: profiles, error: profilesError } = await supabase
+  const groupedConversations = new Map<string, ConversationWithUnreadCount>();
+
+  (conversationsData as ConversationData[]).forEach((conversation) => {
+    const fromId = conversation.from_profile?.id;
+    const toId = conversation.to_profile?.id;
+
+    if (!fromId || !toId) return;
+
+    // Generate a unique key by sorting the IDs (ensures consistent grouping)
+    const key = [fromId, toId].sort().join("-");
+
+    // Count unread messages for this conversation
+    const unreadCount =
+      conversation.messages?.filter(
+        (msg) => !msg.is_read && msg.from_profile_id !== currentUser.id
+      ).length || 0;
+
+    // Add a new property to track unread message IDs
+    const unreadMessageIds =
+      conversation.messages
+        ?.filter(
+          (msg) => !msg.is_read && msg.from_profile_id !== currentUser.id
+        )
+        .map((msg) => msg.id) || [];
+
+    // Store or update the conversation if it's more recent
+    if (
+      !groupedConversations.has(key) ||
+      groupedConversations.get(key)!.last_message_at <
+        conversation.last_message_at
+    ) {
+      groupedConversations.set(key, {
+        id: conversation.id,
+        from_profile: conversation.from_profile || {
+          id: "",
+          name: "Unknown",
+          avatar: "",
+        },
+        to_profile: conversation.to_profile || {
+          id: "",
+          name: "Unknown",
+          avatar: "",
+        },
+        last_message: conversation.last_message || "",
+        last_message_at: conversation.last_message_at,
+        unread_count: unreadCount,
+        unread_message_ids: unreadMessageIds,
+      });
+    }
+  });
+
+  // Convert the map back to an array
+  const uniqueConversations = Array.from(groupedConversations.values());
+
+  // Fetch all profiles for the new chat dialog
+  const { data: profilesData, error: profilesError } = await supabase
     .from("profiles")
-    .select("id, name")
-    .or("avatar.eq.,avatar.is.null")
-    .neq("id", currentUser.id)
-    .returns<Profile[]>();
+    .select("id, name, avatar")
+    .neq("id", currentUser.id);
 
   if (profilesError) {
     return (
@@ -64,73 +126,18 @@ export default async function MessagePage() {
     );
   }
 
+  // Transform profiles to ensure no null values
+  const profiles: Profile[] = (profilesData || []).map((profile) => ({
+    id: profile.id,
+    name: profile.name || "Unknown",
+    avatar: profile.avatar || "",
+  }));
+
   return (
-    <div className="container mx-auto py-6 px-4">
-      <h1 className="text-3xl font-bold mb-2 text-primary">Messages</h1>
-      <p className="text-muted-foreground mb-6">
-        Welcome back, {currentUserName}! Connect with your contacts.
-      </p>
-
-      <ScrollArea className="h-[75vh] w-full rounded-md border">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          {profiles.map((profile) => {
-            const existingConversation = conversations?.find(
-              (conversation) =>
-                conversation.to_profile.id === profile.id ||
-                conversation.from_profile.id === profile.id
-            );
-
-            return (
-              <Card
-                key={profile.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/6.x/initials/svg?seed=${profile.name}`}
-                        />
-                        <AvatarFallback>
-                          {profile.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-base font-semibold">
-                          {profile.name}
-                        </CardTitle>
-                        {existingConversation && (
-                          <p className="text-xs text-muted-foreground">
-                            Last activity:{" "}
-                            {new Date(
-                              existingConversation.last_message_at
-                            ).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {existingConversation && (
-                      <Badge variant="secondary" className="text-xs">
-                        Active
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <ChatButton
-                    existingConversation={existingConversation}
-                    profileId={profile.id}
-                    currentUserId={currentUser.id}
-                    profileName={profile.name}
-                    currentUserName={currentUserName}
-                  />
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </ScrollArea>
-    </div>
+    <MessagePageClient
+      initialConversations={uniqueConversations}
+      initialProfiles={profiles}
+      currentUser={currentUser}
+    />
   );
 }
