@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ChatBox from "./components/chat/chat-box";
+import MessagingApp from "./components/chat/chat-box";
 
 export const metadata: Metadata = {
   title: "Messages | XcelTutors",
@@ -10,8 +10,7 @@ export const metadata: Metadata = {
 export default function MessagePage() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">XcelTutors Messages</h1>
-      <ChatBox />
+      <MessagingApp />
     </main>
   );
 }
