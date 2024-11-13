@@ -84,7 +84,6 @@ export default class TutorsRepository {
     if (tutorQuery.error) {
       throw new Error(`Failed to fetch data: ${tutorQuery.error.message}`);
     }
-    console.log(tutorQuery.data);
 
     // Map availabilities to the required structure
     const response = tutorQuery.data;

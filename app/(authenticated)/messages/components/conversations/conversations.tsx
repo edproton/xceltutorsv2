@@ -17,7 +17,7 @@ export type Conversation = {
   last_message: string;
   last_message_at: string;
   unread_count: { count: number }[];
-  profile: Profile;
+  other_user: Profile;
 };
 
 type ConversationsProps = {
@@ -43,7 +43,12 @@ export default function Conversations({
       .select(
         `
         *,
-        profile:profiles!conversations_to_profile_id_fkey (
+        from_profile:profiles!conversations_from_profile_id_fkey (
+          id,
+          name,
+          avatar
+        ),
+        to_profile:profiles!conversations_to_profile_id_fkey (
           id,
           name,
           avatar
@@ -61,13 +66,15 @@ export default function Conversations({
     if (error) {
       console.error("Error fetching conversations:", error);
     } else if (data) {
-      setConversations(
-        data.map((conv) => ({
-          ...conv,
-          profile: conv.profile as Profile,
-          unread_count: conv.unread_count as { count: number }[],
-        }))
-      );
+      const processedConversations = data.map((conv) => ({
+        ...conv,
+        other_user:
+          conv.from_profile_id === currentUserId
+            ? conv.to_profile
+            : conv.from_profile,
+        unread_count: conv.unread_count as { count: number }[],
+      }));
+      setConversations(processedConversations);
     }
   }, [currentUserId]);
 

@@ -13,6 +13,9 @@ export default function ConversationItem({
   isSelected,
   onSelect,
 }: ConversationItemProps) {
+  const otherUser = conversation.other_user || {};
+  const unreadCount = conversation.unread_count?.[0]?.count || 0;
+
   return (
     <button
       onClick={onSelect}
@@ -21,24 +24,24 @@ export default function ConversationItem({
     >
       <Avatar>
         <AvatarImage
-          src={conversation.profile.avatar || undefined}
-          alt={conversation.profile.name}
+          src={otherUser.avatar || undefined}
+          alt={otherUser.name || "User"}
         />
         <AvatarFallback>
           <span className="font-medium text-base">
-            {conversation.profile.name[0].toUpperCase()}
+            {(otherUser.name || "U")[0].toUpperCase()}
           </span>
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 text-left">
-        <div className="font-medium">{conversation.profile.name}</div>
+        <div className="font-medium">{otherUser.name || "Unknown User"}</div>
         <div className="text-sm text-muted-foreground truncate">
-          {conversation.last_message}
+          {conversation.last_message || "No messages yet"}
         </div>
       </div>
-      {conversation.unread_count[0]?.count > 0 && (
+      {unreadCount > 0 && (
         <Badge variant="destructive" className="rounded-full px-2 py-1">
-          {conversation.unread_count[0].count}
+          {unreadCount}
         </Badge>
       )}
     </button>
