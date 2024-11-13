@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { Message } from '../messages';
+import { Message } from '../components/chat/messages';
 
 export default function useMessageObserver(messages: Message[], onMessageInView: (messageId: number) => void) {
   const observerRef = useRef<IntersectionObserver | null>(null);

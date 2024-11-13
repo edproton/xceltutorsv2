@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { GroupedMessage } from "../message-list";
+import { GroupedMessage } from "./message-list";
 import MessageBubble from "./message-buble";
 
 type MessageGroupProps = {

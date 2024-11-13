@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createClient } from "@/lib/supabase/client";
-import { Message } from '../messages';
+import { Message } from '../components/chat/messages';
 
 const supabase = createClient();
 

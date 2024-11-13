@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Conversations from "./components/conversations/conversations";
-import Messages from "./components/messages/messages";
-import NewChatModal from "./components/new-chat-modal";
-import { Profile } from "./types";
+import { Profile } from "../../types";
+import Conversations from "../conversations/conversations";
+import NewChatModal from "../conversations/new-chat-modal";
+import Messages from "./messages";
 
 const supabase = createClient();
 

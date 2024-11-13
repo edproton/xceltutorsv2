@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { Profile } from "../types";
+import { Profile } from "../../types";
 import useDebounce from "@/hooks/use-debounce";
 import { createClient } from "@/lib/supabase/client";
 import { useCallback, useEffect, useState } from "react";

@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { Profile } from "../../types";
 import MessageHeader from "./message-header";
-import MessageList from "./message-list";
+import MessageList from "./message-list/message-list";
 import MessageInput from "./message-input";
-import useMessages from "./messages/use-messages";
-import useConversation from "./messages/use-conversation";
+import useMessages from "../../hooks/use-messages";
+import useConversation from "../../hooks/use-conversation";
 
 export type Message = {
   id: number;
