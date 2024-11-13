@@ -46,7 +46,7 @@ export default function MessagingApp() {
   };
 
   return (
-    <div className="flex h-[600px] max-w-4xl mx-auto border rounded-lg overflow-hidden">
+    <div className="flex h-[700px] max-w-screen-2xl mx-auto border rounded-lg overflow-hidden">
       <Conversations
         currentUserId={currentUserId}
         selectedConversationId={selectedConversationId}
