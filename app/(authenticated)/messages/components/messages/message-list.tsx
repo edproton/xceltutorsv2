@@ -1,7 +1,6 @@
-import { memo, useMemo, useEffect, useRef, useCallback } from "react";
+import { memo, useMemo, useEffect, useRef } from "react";
 import { Message } from "./messages";
 import { format } from "date-fns";
-import debounce from "@/lib/helpers/debounce";
 import MessageGroup from "./message-list/message-group";
 import ScrollButton from "./message-list/scroll-button";
 import useScrollManagement from "./message-list/use-scroll-management";
@@ -29,16 +28,8 @@ const MessageList = memo(function MessageList({
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const { showScrollButton, isScrolledToBottom, scrollToBottom } =
     useScrollManagement(scrollAreaRef as React.RefObject<HTMLDivElement>);
-  const debouncedOnMessageInView = useCallback(
-    debounce((messageId: unknown) => {
-      if (typeof messageId === "number") {
-        onMessageInView(messageId);
-      }
-    }, 300),
-    [onMessageInView]
-  );
 
-  useMessageObserver(messages, debouncedOnMessageInView);
+  useMessageObserver(messages, onMessageInView);
 
   const groupedMessages = useMemo(
     () => groupMessages(messages, currentUserId, otherPersonName),

@@ -8,8 +8,6 @@ export default function useMessages(conversationId: number | null, currentUserId
   const [messages, setMessages] = useState<Message[]>([]);
   const messageCache = useRef(new Set<number>());
 
-  console.log("from setMessages");
-    // console.log(messages[72]);
   useEffect(() => {
     if (!conversationId) return;
 
@@ -20,15 +18,11 @@ export default function useMessages(conversationId: number | null, currentUserId
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
-        console.log("from messageData");
-        // console.log(messagesData[72]); // the is_read is false
       if (messagesError) {
         console.error("Error fetching messages:", messagesError);
       } else if (messagesData) {
-        setMessages(messagesData || []);
-        messageCache.current = new Set(
-          messagesData?.map((msg) => msg.id) || []
-        );
+        setMessages(messagesData);
+        messageCache.current = new Set(messagesData.map((msg) => msg.id));
       }
     };
 
@@ -107,43 +101,55 @@ export default function useMessages(conversationId: number | null, currentUserId
 
   const markMessageAsRead = useCallback(async (messageId: number) => {
     if (!messageCache.current.has(messageId)) return;
-  
+
     try {
-      const { error } = await supabase
-        .from("messages")
-        .update({ is_read: true })
-        .eq("id", messageId)
-        .neq("from_profile_id", currentUserId);
-  
-      if (error) {
-        console.error("Error marking message as read:", error);
-      } else {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, is_read: true } : msg
-          )
-        );
-        messageCache.current.delete(messageId);
+      const messageToUpdate = messages.find(msg => msg.id === messageId);
+    
+      // Only mark the message as read if it's not from the current user and it's not already read
+      if (messageToUpdate && messageToUpdate.from_profile_id !== currentUserId && !messageToUpdate.is_read) {
+        const { data, error } = await supabase
+          .from("messages")
+          .update({ is_read: true })
+          .eq("id", messageId)
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Error marking message as read:", error);
+        } else if (data) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === messageId ? data : msg
+            )
+          );
+          messageCache.current.delete(messageId);
+        }
       }
     } catch (error) {
       console.error("Error marking message as read:", error);
     }
-  }, [currentUserId]);
+  }, [messages, currentUserId]);
 
   const markAllMessagesAsRead = useCallback(async () => {
     if (!conversationId) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("messages")
         .update({ is_read: true })
         .eq("conversation_id", conversationId)
-        .neq("from_profile_id", currentUserId);
+        .neq("from_profile_id", currentUserId)
+        .select();
 
       if (error) {
         console.error("Error marking all messages as read:", error);
-      } else {
-        setMessages((prev) => prev.map((msg) => ({ ...msg, is_read: true })));
+      } else if (data) {
+        setMessages((prev) => 
+          prev.map((msg) => {
+            const updatedMsg = data.find((m) => m.id === msg.id);
+            return updatedMsg ? updatedMsg : msg;
+          })
+        );
         messageCache.current.clear();
       }
     } catch (error) {

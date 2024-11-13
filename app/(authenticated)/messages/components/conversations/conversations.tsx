@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,7 +35,7 @@ export default function Conversations({
 }: ConversationsProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!currentUserId) return;
 
     const { data, error } = await supabase
@@ -69,7 +69,7 @@ export default function Conversations({
         }))
       );
     }
-  };
+  }, [currentUserId]);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -103,7 +103,7 @@ export default function Conversations({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentUserId]);
+  }, [currentUserId, fetchConversations]);
 
   return (
     <div className="w-80 border-r bg-muted/50 flex flex-col">
