@@ -16,7 +16,6 @@ import {
   X,
   GraduationCap,
   MapPin,
-  Users,
   Menu,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
 import {
   Popover,
   PopoverTrigger,
