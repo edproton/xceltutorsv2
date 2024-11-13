@@ -221,12 +221,12 @@ export default function ViewTutorsByIdPageContent({
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Tutor Impact</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col items-center text-center">
             <Star className="w-8 h-8 text-primary mb-2" />
-            <span className="text-2xl font-bold">4.9</span>
+            <span className="text-2xl font-bold">{metadata.reviews}</span>
             <span className="text-sm text-muted-foreground">
-              {metadata.reviews} reviews
+              Received reviews
             </span>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -236,13 +236,6 @@ export default function ViewTutorsByIdPageContent({
             </span>
             <span className="text-sm text-muted-foreground">
               Lessons completed
-            </span>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <Users className="w-8 h-8 text-primary mb-2" />
-            <span className="text-2xl font-bold">{metadata.reviews - 15}</span>
-            <span className="text-sm text-muted-foreground">
-              Students helped
             </span>
           </div>
         </CardContent>
@@ -397,13 +390,13 @@ export default function ViewTutorsByIdPageContent({
                   </PopoverTrigger>
                   <PopoverContent className="w-80 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-emerald-200 dark:border-emerald-800">
                     <h4 className="font-semibold text-lg mb-2">
-                      Personally interviewed by xceltutors
+                      Interviewed and Approved
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      We carefully select tutors from top UK universities. Our
-                      team personally assesses each candidate for subject
-                      knowledge, communication skills, and teaching approach.
-                      Only about 1 in 8 applicants becomes a xceltutors tutor.
+                      We carefully select tutors from top UK universities,
+                      evaluating their expertise, communication, and teaching
+                      skills. Only the crème de la crème are chosen to join our
+                      team.
                     </p>
                   </PopoverContent>
                 </Popover>
@@ -428,10 +421,7 @@ export default function ViewTutorsByIdPageContent({
                       Enhanced DBS check
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      {`Completed on 28 Jul '23. The Disclosure and Barring
-                      Service (DBS) helps employers make safer recruitment
-                      decisions and prevent unsuitable people from working with
-                      vulnerable groups, including children.`}
+                      {`DBS check completed. The Disclosure and Barring Service (DBS) helps employers make safer recruitment decisions and prevents unsuitable people from working with vulnerable groups, including children.`}
                     </p>
                   </PopoverContent>
                 </Popover>
@@ -555,119 +545,6 @@ export default function ViewTutorsByIdPageContent({
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </motion.div>
-            {/* Reviews Section */}
-            <motion.div
-              variants={staggeredFadeIn}
-              custom={5}
-              initial="hidden"
-              animate={isAnimationComplete ? "visible" : "hidden"}
-              className="space-y-6"
-            >
-              <h2 className="text-xl font-semibold">Ratings & reviews</h2>
-              <div className="flex items-center gap-8">
-                <div className="text-center">
-                  <div className="text-4xl font-bold">5.0</div>
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-4 h-4 fill-primary text-primary"
-                      />
-                    ))}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    61 reviews
-                  </div>
-                </div>
-                <div className="flex-1 space-y-2">
-                  {[
-                    { rating: 5, count: 60 },
-                    { rating: 4, count: 1 },
-                    { rating: 3, count: 0 },
-                    { rating: 2, count: 0 },
-                    { rating: 1, count: 0 },
-                  ].map((item) => (
-                    <div key={item.rating} className="flex items-center gap-2">
-                      <div className="w-4">{item.rating}</div>
-                      <Progress
-                        value={(item.count / 61) * 100}
-                        className="h-2"
-                      />
-                      <div className="w-8 text-sm text-muted-foreground">
-                        {item.count}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Individual Reviews */}
-              <div className="space-y-4">
-                {[
-                  {
-                    initials: "JG",
-                    name: "Jamie",
-                    location: "Parent from Lymington",
-                    date: "24 Mar",
-                    comment:
-                      "Lessons are always structured well. Angel ensures understanding of the topic we cover",
-                  },
-                  {
-                    initials: "WK",
-                    name: "Wendy",
-                    location: "Parent from London",
-                    date: "31 May '23",
-                    comment: "very good",
-                  },
-                  {
-                    initials: "WK",
-                    name: "Wendy",
-                    location: "Parent from London",
-                    date: "18 May '23",
-                    comment: "very helpful lesson",
-                  },
-                ].map((review, index) => (
-                  <motion.div
-                    key={index}
-                    variants={staggeredFadeIn}
-                    custom={index + 6}
-                    initial="hidden"
-                    animate={isAnimationComplete ? "visible" : "hidden"}
-                    className="border-t pt-4 hover:bg-primary/5 transition-colors duration-200 rounded-lg p-4"
-                  >
-                    <div className="flex items-start gap-4">
-                      <Avatar>
-                        <AvatarFallback>{review.initials}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium">{review.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {review.location}
-                            </div>
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {review.date}
-                          </div>
-                        </div>
-                        <div className="flex gap-1 my-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="w-4 fill-primary text-primary"
-                            />
-                          ))}
-                        </div>
-                        <p className="text-muted-foreground">
-                          {review.comment}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
               </div>
             </motion.div>
           </div>
