@@ -114,7 +114,7 @@ export default function Conversations({
 
   return (
     <div className="w-80 border-r bg-muted/50 flex flex-col">
-      <div className="p-4 flex justify-between items-center border-b">
+      <div className="border-b h-[60px] px-4 flex justify-between items-center">
         <h2 className="font-semibold">Conversations</h2>
         <Button variant="ghost" size="icon" onClick={onNewChat}>
           <Plus className="h-4 w-4" />

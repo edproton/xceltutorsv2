@@ -7,7 +7,7 @@ type MessageHeaderProps = {
 
 export default function MessageHeader({ otherProfile }: MessageHeaderProps) {
   return (
-    <div className="border-b p-4 flex items-center space-x-3">
+    <div className="border-b h-[60px] px-4 flex items-center space-x-3">
       <Avatar>
         <AvatarImage
           src={otherProfile?.avatar || undefined}

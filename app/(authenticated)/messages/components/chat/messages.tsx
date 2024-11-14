@@ -31,13 +31,15 @@ export default function Messages({
   const { messages, sendMessage, markMessageAsRead, markAllMessagesAsRead } =
     useMessages(conversationId, currentUserId);
 
-  const { fetchConversation } = useConversation();
+  const { fetchConversation } = useConversation(currentUserId);
 
   useEffect(() => {
     if (!conversationId) return;
 
     const loadConversation = async () => {
       const conversationData = await fetchConversation(conversationId);
+
+      console.log(conversationData);
       if (conversationData) {
         setOtherProfile(conversationData.profile as Profile);
       }

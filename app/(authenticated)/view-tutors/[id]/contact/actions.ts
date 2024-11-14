@@ -29,7 +29,7 @@ export const submitTutoringRequest = actionClient
     redirect(`/view-tutors/${tutorId}/contact/confirmation`);
   });
 
-export async function getTutorWithGroupedServices(
+async function getTutorWithGroupedServices(
   supabase: DbSupabaseClient,
   tutorId: string
 ): Promise<TutorInfo> {
