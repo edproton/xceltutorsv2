@@ -23,8 +23,12 @@ export interface CardMessage {
   type: "card";
   title: string;
   description: string;
-  url: string;
   imageUrl?: string;
+  actions?: {
+    classes?: string;
+    label: string;
+    url: string;
+  }[];
 }
 
 export type MessageContent = TextMessage | CardMessage;
