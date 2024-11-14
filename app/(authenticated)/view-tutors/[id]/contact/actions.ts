@@ -1,33 +1,8 @@
 "use server";
 
-import { actionClient } from "@/lib/safe-action";
-import { tutoringFormSchema } from "./components/tutoring-form/schema";
-import { redirect } from "next/navigation";
 import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 import { Level, SubjectWithLevels, TutorInfo } from "./types";
-
-export const submitTutoringRequest = actionClient
-  .schema(tutoringFormSchema)
-  .action(async (data) => {
-    console.log("Received form data:", data);
-
-    // validate if tutor exists
-    const tutorId = data.parsedInput.tutorId;
-
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("tutors")
-      .select("id")
-      .eq("id", tutorId)
-      .single();
-
-    if (error) {
-      throw new Error(`Tutor with id ${tutorId} does not exist`);
-    }
-
-    redirect(`/view-tutors/${tutorId}/contact/confirmation`);
-  });
 
 async function getTutorWithGroupedServices(
   supabase: DbSupabaseClient,

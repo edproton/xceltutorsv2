@@ -13,7 +13,7 @@ import FrequencySelect from "./frequency-select";
 import SubmitButton from "./submit-button";
 import InfoCard from "./info-card";
 import FAQSection from "./faq-section";
-import { submitTutoringRequest } from "../../actions";
+import { submitTutoringRequest } from "./actions";
 import { TutorInfo } from "../../types";
 
 export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
@@ -43,10 +43,10 @@ export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
         },
       },
       actionProps: {
-        onError: () => {
+        onError: ({ error }) => {
           toast({
             title: "Error",
-            description: "An error occurred. Please try again.",
+            description: error.serverError,
             variant: "destructive",
           });
         },

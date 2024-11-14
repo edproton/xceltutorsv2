@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import {
@@ -9,12 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, CheckCheck, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import {
-  CardMessage,
-  Message,
-  MessageContent,
-  TextMessage,
-} from "../../../types";
+import { Message, MessageContent } from "../../../types";
+import { CallbackDialog } from "./callback-dialog";
 
 interface MessageBubbleProps {
   message: Message;
@@ -37,6 +35,16 @@ export default function MessageBubble({
   senderName,
 }: MessageBubbleProps) {
   const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentCallback, setCurrentCallback] = useState<{
+    name: string;
+    params: Record<string, string>;
+  } | null>(null);
+
+  const handleCallback = (name: string, params: Record<string, string>) => {
+    setCurrentCallback({ name, params });
+    setIsDialogOpen(true);
+  };
 
   return (
     <div
@@ -114,6 +122,14 @@ export default function MessageBubble({
                                 : "col-span-2"
                             }`}
                             asChild={!!action.url}
+                            onClick={() => {
+                              if (action.callback) {
+                                handleCallback(
+                                  action.callback.name,
+                                  action.callback.params
+                                );
+                              }
+                            }}
                           >
                             {action.url ? (
                               <Link
@@ -156,6 +172,14 @@ export default function MessageBubble({
             ))}
         </div>
       </div>
+      {currentCallback && (
+        <CallbackDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          callbackName={currentCallback.name}
+          params={currentCallback.params}
+        />
+      )}
     </div>
   );
 }

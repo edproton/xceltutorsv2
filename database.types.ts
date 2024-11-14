@@ -79,28 +79,31 @@ export type Database = {
       }
       messages: {
         Row: {
-          content: string
+          content: Json
           conversation_id: number | null
           created_at: string | null
           from_profile_id: string | null
           id: number
           is_read: boolean
+          visible_to: string | null
         }
         Insert: {
-          content: string
+          content?: Json
           conversation_id?: number | null
           created_at?: string | null
           from_profile_id?: string | null
           id?: number
           is_read?: boolean
+          visible_to?: string | null
         }
         Update: {
-          content?: string
+          content?: Json
           conversation_id?: number | null
           created_at?: string | null
           from_profile_id?: string | null
           id?: number
           is_read?: boolean
+          visible_to?: string | null
         }
         Relationships: [
           {
@@ -124,6 +127,7 @@ export type Database = {
           avatar: string | null
           created_at: string | null
           id: string
+          last_active: string | null
           name: string | null
           updated_at: string | null
         }
@@ -131,6 +135,7 @@ export type Database = {
           avatar?: string | null
           created_at?: string | null
           id: string
+          last_active?: string | null
           name?: string | null
           updated_at?: string | null
         }
@@ -138,6 +143,7 @@ export type Database = {
           avatar?: string | null
           created_at?: string | null
           id?: string
+          last_active?: string | null
           name?: string | null
           updated_at?: string | null
         }
@@ -266,7 +272,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_user_online: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      upsert_user_session: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
