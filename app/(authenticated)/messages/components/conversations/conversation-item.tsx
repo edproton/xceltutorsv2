@@ -13,8 +13,8 @@ export default function ConversationItem({
   isSelected,
   onSelect,
 }: ConversationItemProps) {
-  const otherUser = conversation.other_user || {};
-  const unreadCount = conversation.unread_count?.[0]?.count || 0;
+  const otherUser = conversation.other_user;
+  const unreadCount = conversation.unread_count;
 
   return (
     <button

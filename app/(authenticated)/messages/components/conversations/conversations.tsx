@@ -16,7 +16,7 @@ export type Conversation = {
   to_profile_id: string;
   last_message: string;
   last_message_at: string;
-  unread_count: { count: number }[];
+  unread_count: number;
   other_user: Profile;
 };
 
@@ -53,27 +53,46 @@ export default function Conversations({
           name,
           avatar
         ),
-        unread_count:messages(count)
+        messages!inner (
+          id,
+          from_profile_id,
+          is_read
+        )
       `
       )
       .or(
         `from_profile_id.eq.${currentUserId},to_profile_id.eq.${currentUserId}`
       )
-      .eq("messages.is_read", false)
-      .neq("messages.from_profile_id", currentUserId)
       .order("last_message_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching conversations:", error);
     } else if (data) {
-      const processedConversations = data.map((conv) => ({
-        ...conv,
-        other_user:
+      const processedConversations = data.map((conv) => {
+        const otherUser =
           conv.from_profile_id === currentUserId
             ? conv.to_profile
-            : conv.from_profile,
-        unread_count: conv.unread_count as { count: number }[],
-      }));
+            : conv.from_profile;
+
+        // Calculate unread count manually from the messages
+        // This is not ideal and should be done in the database
+        const unreadCount = conv.messages.filter(
+          (msg: { is_read: boolean; from_profile_id: string }) =>
+            !msg.is_read &&
+            msg.from_profile_id !== currentUserId &&
+            // Ensure the message is from the other participant in this conversation
+            ((conv.from_profile_id === currentUserId &&
+              msg.from_profile_id === conv.to_profile_id) ||
+              (conv.to_profile_id === currentUserId &&
+                msg.from_profile_id === conv.from_profile_id))
+        ).length;
+
+        return {
+          ...conv,
+          other_user: otherUser,
+          unread_count: unreadCount,
+        };
+      });
       setConversations(processedConversations);
     }
   }, [currentUserId]);
@@ -91,7 +110,6 @@ export default function Conversations({
           event: "*",
           schema: "public",
           table: "conversations",
-          filter: `from_profile_id=eq.${currentUserId}`,
         },
         () => fetchConversations()
       )
@@ -101,7 +119,6 @@ export default function Conversations({
           event: "*",
           schema: "public",
           table: "messages",
-          filter: `from_profile_id=neq.${currentUserId}`,
         },
         () => fetchConversations()
       )
