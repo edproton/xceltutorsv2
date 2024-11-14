@@ -1,16 +1,15 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 import { TutorWithAvailabilityAndServices } from "./types";
 
 async function getTutorById(
+  supabase: DbSupabaseClient,
   id: string
 ): Promise<TutorWithAvailabilityAndServices> {
-  const client = await createClient();
-
   // Step 1: Fetch tutor data with related profiles, services, and availabilities
-  const tutorQuery = await client
+  const tutorQuery = await supabase
     .from("tutors")
     .select(
       `
@@ -99,5 +98,7 @@ async function getTutorById(
 export async function getTutorByIdCached(
   id: string
 ): Promise<TutorWithAvailabilityAndServices> {
-  return unstable_cache(() => getTutorById(id), [`tutor-${id}`])();
+  const supabase = await createClient();
+
+  return unstable_cache(() => getTutorById(supabase, id), [`tutor-${id}`])();
 }
