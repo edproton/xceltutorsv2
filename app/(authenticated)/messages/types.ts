@@ -28,7 +28,10 @@ export interface CardMessage {
     classes?: string;
     label: string;
     url?: string;
-    callbackName?: string;
+    callback?: {
+      name: string;
+      params: Record<string, string>;
+    };
   }[];
 }
 

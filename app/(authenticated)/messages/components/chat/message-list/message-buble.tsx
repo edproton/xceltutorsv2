@@ -9,9 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, CheckCheck, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { CardMessage, Message, TextMessage } from "../../../types";
-
-type MessageContent = CardMessage | TextMessage;
+import {
+  CardMessage,
+  Message,
+  MessageContent,
+  TextMessage,
+} from "../../../types";
 
 interface MessageBubbleProps {
   message: Message;
@@ -87,13 +90,13 @@ export default function MessageBubble({
                   <CardFooter className="p-4 pt-2">
                     <div className="grid grid-cols-2 gap-2 w-full">
                       {item.actions.map((action, actionIndex) => {
-                        if (!action.url && !action.callbackName) {
+                        if (!action.url && !action.callback) {
                           setError(
                             "Each action must have either a URL or a callback name."
                           );
                           return null;
                         }
-                        if (action.url && action.callbackName) {
+                        if (action.url && action.callback) {
                           setError(
                             "An action cannot have both a URL and a callback name."
                           );

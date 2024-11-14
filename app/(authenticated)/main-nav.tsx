@@ -18,7 +18,7 @@ export default function MainNav() {
 
   const routes = [
     {
-      href: "/",
+      href: "/dashboard",
       label: "Home",
     },
     {
