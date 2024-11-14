@@ -12,13 +12,20 @@ export const submitTutoringRequest = actionClient
   .action(async (data) => {
     console.log("Received form data:", data);
 
-    // Simulate some processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // validate if tutor exists
+    const tutorId = data.parsedInput.tutorId;
 
-    // Mock successful response
-    const tutorId = "123";
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("tutors")
+      .select("id")
+      .eq("id", tutorId)
+      .single();
 
-    // Redirect to the confirmation page
+    if (error) {
+      throw new Error(`Tutor with id ${tutorId} does not exist`);
+    }
+
     redirect(`/view-tutors/${tutorId}/contact/confirmation`);
   });
 

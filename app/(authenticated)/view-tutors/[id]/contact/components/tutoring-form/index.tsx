@@ -34,6 +34,7 @@ export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
     {
       formProps: {
         defaultValues: {
+          tutorId: tutor.id,
           levelId: "",
           message: "",
           meetingDate: undefined,
@@ -61,6 +62,7 @@ export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
         <div className="lg:col-span-7">
           <FormHeader tutorName={tutor.name} />
           <form className="space-y-8" onSubmit={handleSubmitWithAction}>
+            <input type="hidden" name="tutorId" value={tutor.id} />
             <SubjectLevelSelect
               control={control}
               errors={errors}
