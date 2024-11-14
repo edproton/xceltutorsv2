@@ -106,7 +106,7 @@ export async function getTutorsPaginatedCached(
     () => getTutorsPaginated(supabase, pageNumber),
     [`tutors-paginated-${pageNumber}`],
     {
-      revalidate: 60 * 60 * 12, // 12 hours in seconds
+      revalidate: 60 * 60 * 24 * 7, // 1 week
       tags: [`tutors-page-${pageNumber}`],
     }
   )();
