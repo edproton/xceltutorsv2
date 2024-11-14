@@ -51,6 +51,7 @@ import {
 import { TutorWithAvailabilityAndServices } from "../tutors-repository";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 const weekdayIndexMap = {
   Monday: 0,
@@ -63,7 +64,7 @@ const weekdayIndexMap = {
 };
 
 export default function ViewTutorsByIdPageContent({
-  tutor: { name, avatar, metadata, availabilities, services },
+  tutor: { id, name, avatar, metadata, availabilities, services },
 }: {
   tutor: TutorWithAvailabilityAndServices;
 }) {
@@ -161,7 +162,9 @@ export default function ViewTutorsByIdPageContent({
         <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
           <div className="text-center space-y-2">
             <h3 className="font-semibold text-lg">
-              Get in touch with {name.split(" ")[0]}
+              <Link href={`/view-tutors/${id}/contact`}>
+                Get in touch with {name.split(" ")[0]}
+              </Link>
             </h3>
             <p className="text-sm text-muted-foreground">
               Have a chat with {name.split(" ")[0]} and see how (and when!) they
@@ -174,9 +177,12 @@ export default function ViewTutorsByIdPageContent({
                 <Button
                   className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-semibold transition-all duration-200 transform hover:scale-105"
                   size="lg"
+                  asChild
                 >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Get in touch
+                  <Link href={`/view-tutors/${id}/contact`}>
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Get in touch
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

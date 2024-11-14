@@ -6,7 +6,7 @@ import "@/env";
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    domains: ["bff.xceltutors.com"],
+    domains: ["rlqvhmhinnazuijrkrwq.supabase.co"],
   },
 };
 
