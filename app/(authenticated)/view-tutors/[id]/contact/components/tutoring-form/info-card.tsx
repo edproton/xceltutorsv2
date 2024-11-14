@@ -57,7 +57,7 @@ export default function InfoCard({ tutor, watchedFields }: InfoCardProps) {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-center mb-6">
-              Here's what you'd like {tutor.name} to help you with
+              {`Here's what you'd like ${tutor.name} to help you with`}
             </h2>
             {!isInfoCardEmpty && (
               <div className="space-y-4">

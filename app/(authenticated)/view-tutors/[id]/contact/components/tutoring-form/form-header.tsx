@@ -5,8 +5,8 @@ export default function FormHeader({ tutorName }: { tutorName: string }) {
         Reach out to {tutorName}
       </h1>
       <p className="text-base text-muted-foreground sm:text-lg">
-        Find out whether {tutorName} is the tutor you're looking for by dropping
-        a message and requesting a 15min video meeting (it's free)
+        {`Find out whether {tutorName} is the tutor you're looking for by dropping
+        a message and requesting a 15min video meeting (it's free)`}
       </p>
     </div>
   );

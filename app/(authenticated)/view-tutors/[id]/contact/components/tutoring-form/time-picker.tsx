@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,14 @@ interface TimePickerProps {
   value?: string;
 }
 
+// Move periods array outside of the component
+const periods = [
+  { label: "12am - 5am", value: "12am-5am", start: 0, end: 5 },
+  { label: "6am - 11am", value: "6am-11am", start: 6, end: 11 },
+  { label: "12pm - 5pm", value: "12pm-5pm", start: 12, end: 17 },
+  { label: "6pm - 11pm", value: "6pm-11pm", start: 18, end: 23 },
+];
+
 export default function TimePicker({
   onTimeSelect,
   disabled = false,
@@ -31,14 +39,7 @@ export default function TimePicker({
   const [selectedPeriod, setSelectedPeriod] = useState<string>("12am-5am");
   const [selectedTime, setSelectedTime] = useState<string | undefined>(value);
 
-  const periods = [
-    { label: "12am - 5am", value: "12am-5am", start: 0, end: 5 },
-    { label: "6am - 11am", value: "6am-11am", start: 6, end: 11 },
-    { label: "12pm - 5pm", value: "12pm-5pm", start: 12, end: 17 },
-    { label: "6pm - 11pm", value: "6pm-11pm", start: 18, end: 23 },
-  ];
-
-  const generateTimeSlots = (start: number, end: number) => {
+  const generateTimeSlots = useCallback((start: number, end: number) => {
     const slots = [];
     for (let hour = start; hour <= end; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
@@ -48,12 +49,12 @@ export default function TimePicker({
       }
     }
     return slots;
-  };
+  }, []);
 
   const timeSlots = useMemo(() => {
     const period = periods.find((p) => p.value === selectedPeriod);
     return period ? generateTimeSlots(period.start, period.end) : [];
-  }, [selectedPeriod]);
+  }, [selectedPeriod, generateTimeSlots]);
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
@@ -73,7 +74,7 @@ export default function TimePicker({
         setSelectedPeriod(period.value);
       }
     }
-  }, [selectedTime, periods]);
+  }, [selectedTime]);
 
   return (
     <div className="space-y-2">
