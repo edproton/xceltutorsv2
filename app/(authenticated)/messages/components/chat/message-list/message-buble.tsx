@@ -104,11 +104,11 @@ export default function MessageBubble({
                           <Button
                             key={`action-${actionIndex}`}
                             className={`text-xs px-2 py-1 rounded ${
-                              action.classes || "bg-slate-300 text-foreground"
+                              action.classes
                             } ${
-                              actionIndex === 2 && item.actions?.length === 3
-                                ? "col-span-2"
-                                : ""
+                              item.actions && item.actions.length % 2 === 0
+                                ? "col-span-1"
+                                : "col-span-2"
                             }`}
                             asChild={!!action.url}
                           >
