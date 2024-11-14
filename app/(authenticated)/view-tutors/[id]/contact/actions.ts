@@ -1,34 +1,35 @@
 "use server";
 
-import { actionClient } from '@/lib/safe-action'
-import { tutoringFormSchema } from './components/tutoring-form/schema'
-import { redirect } from 'next/navigation'
-import { createClient, DbSupabaseClient } from '@/lib/supabase/server';
-import { unstable_cache } from 'next/cache';
-import { Level, SubjectWithLevels, TutorInfo } from './types';
-
+import { actionClient } from "@/lib/safe-action";
+import { tutoringFormSchema } from "./components/tutoring-form/schema";
+import { redirect } from "next/navigation";
+import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { Level, SubjectWithLevels, TutorInfo } from "./types";
 
 export const submitTutoringRequest = actionClient
-.schema(tutoringFormSchema)
-.action(async (data) => {
-  console.log('Received form data:', data)
+  .schema(tutoringFormSchema)
+  .action(async (data) => {
+    console.log("Received form data:", data);
 
-  // Simulate some processing time
-  await new Promise(resolve => setTimeout(resolve, 1000))
+    // Simulate some processing time
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Mock successful response
-  const tutorId = '123'
+    // Mock successful response
+    const tutorId = "123";
 
-  // Redirect to the confirmation page
-  redirect(`/view-tutors/${tutorId}/contact/confirmation`)
-})
+    // Redirect to the confirmation page
+    redirect(`/view-tutors/${tutorId}/contact/confirmation`);
+  });
 
 export async function getTutorWithGroupedServices(
   supabase: DbSupabaseClient,
-  tutorId: string): Promise<TutorInfo> {
+  tutorId: string
+): Promise<TutorInfo> {
   const { data, error } = await supabase
     .from("tutors")
-    .select(`
+    .select(
+      `
       id,
       profiles (name, avatar),
       tutors_services (
@@ -38,7 +39,8 @@ export async function getTutorWithGroupedServices(
           subjects (name)
         )
       )
-    `)
+    `
+    )
     .eq("id", tutorId)
     .single();
 
@@ -54,12 +56,14 @@ export async function getTutorWithGroupedServices(
   const subjectMap = new Map<string, Set<Level>>();
 
   // Populate the map
-  data.tutors_services.forEach(service => {
+  data.tutors_services.forEach((service) => {
     const level = service.levels;
     if (level && level.subjects) {
       // Handle the case where subjects is a single object
-      const subjectArray = Array.isArray(level.subjects) ? level.subjects : [level.subjects];
-      subjectArray.forEach(subject => {
+      const subjectArray = Array.isArray(level.subjects)
+        ? level.subjects
+        : [level.subjects];
+      subjectArray.forEach((subject) => {
         if (!subjectMap.has(subject.name)) {
           subjectMap.set(subject.name, new Set());
         }
@@ -69,24 +73,28 @@ export async function getTutorWithGroupedServices(
   });
 
   // Convert the map to the desired structure
-  const subjects: SubjectWithLevels[] = Array.from(subjectMap.entries()).map(([name, levelSet]) => ({
-    name,
-    levels: Array.from(levelSet)
-  }));
+  const subjects: SubjectWithLevels[] = Array.from(subjectMap.entries()).map(
+    ([name, levelSet]) => ({
+      name,
+      levels: Array.from(levelSet),
+    })
+  );
 
   return {
     id: data.id,
     name: data.profiles?.name ?? "Unknown Tutor",
     avatar: data.profiles?.avatar ?? "",
-    subjects: subjects
+    subjects: subjects,
   };
 }
 
-export async function getTutorWithGroupedServicesCached(tutorId: string): Promise<TutorInfo> {
+export async function getTutorWithGroupedServicesCached(
+  tutorId: string
+): Promise<TutorInfo> {
   const supabase = await createClient();
 
   return unstable_cache(
     () => getTutorWithGroupedServices(supabase, tutorId),
-    [`tutor-${tutorId}-contact-page`]
+    [`tutor-${tutorId}`]
   )();
 }

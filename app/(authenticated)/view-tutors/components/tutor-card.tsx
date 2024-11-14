@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { TutorWithPrices } from "../tutors-repository";
+import { TutorWithPrices } from "../types";
 
 interface TutorCardProps {
   tutor: TutorWithPrices;

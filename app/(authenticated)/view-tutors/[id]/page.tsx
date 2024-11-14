@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import TutorsRepository from "../tutors-repository";
 import ViewTutorsByIdPageContent from "./page-content";
+import { getTutorByIdCached } from "./actions";
 
 interface ViewTutorsByIdPageProps {
   params: Promise<{
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params,
 }: ViewTutorsByIdPageProps): Promise<Metadata> {
   const { id } = await params;
-  const tutor = await TutorsRepository.getTutorById(id);
+  const tutor = await getTutorByIdCached(id);
 
   return {
     title: `${tutor.name} - Tutor Profile`,
@@ -24,7 +24,7 @@ export default async function ViewTutorsByIdPage({
   params,
 }: ViewTutorsByIdPageProps) {
   const { id } = await params;
-  const tutor = await TutorsRepository.getTutorById(id);
+  const tutor = await getTutorByIdCached(id);
 
   return <ViewTutorsByIdPageContent tutor={tutor} />;
 }

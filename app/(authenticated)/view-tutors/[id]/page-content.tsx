@@ -48,10 +48,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { TutorWithAvailabilityAndServices } from "../tutors-repository";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { TutorWithAvailabilityAndServices } from "./types";
 
 const weekdayIndexMap = {
   Monday: 0,

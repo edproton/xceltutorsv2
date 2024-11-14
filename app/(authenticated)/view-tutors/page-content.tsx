@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import ImprovedFilterSection from "./components/filters-section";
 import Pagination from "./components/pagination";
 import TutorCard from "./components/tutor-card";
-import { PageResponse, TutorWithPrices } from "./tutors-repository";
+import { PageResponse, TutorWithPrices } from "./types";
 
 export default function ViewTutorsPage({
   tutors,
