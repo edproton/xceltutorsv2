@@ -9,33 +9,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, CheckCheck, ExternalLink } from "lucide-react";
 import Link from "next/link";
-
-interface CardMessage {
-  type: "card";
-  title: string;
-  description: string;
-  imageUrl?: string;
-  actions?: {
-    classes?: string;
-    label: string;
-    url?: string;
-    callbackName?: string;
-  }[];
-}
-
-interface TextMessage {
-  type: "text";
-  text: string;
-}
+import { CardMessage, Message, TextMessage } from "../../../types";
 
 type MessageContent = CardMessage | TextMessage;
-
-interface Message {
-  id: string;
-  content: MessageContent[];
-  created_at: string;
-  is_read: boolean;
-}
 
 interface MessageBubbleProps {
   message: Message;
@@ -123,11 +99,12 @@ export default function MessageBubble({
                           );
                           return null;
                         }
+
                         return (
                           <Button
                             key={`action-${actionIndex}`}
                             className={`text-xs px-2 py-1 rounded ${
-                              action.classes || ""
+                              action.classes || "bg-slate-300 text-foreground"
                             } ${
                               actionIndex === 2 && item.actions?.length === 3
                                 ? "col-span-2"

@@ -27,7 +27,8 @@ export interface CardMessage {
   actions?: {
     classes?: string;
     label: string;
-    url: string;
+    url?: string;
+    callbackName?: string;
   }[];
 }
 
