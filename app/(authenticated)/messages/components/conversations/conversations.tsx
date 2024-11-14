@@ -130,7 +130,7 @@ export default function Conversations({
   }, [currentUserId, fetchConversations]);
 
   return (
-    <div className="w-80 border-r bg-muted/50 flex flex-col">
+    <div className="w-60 border-r bg-muted/50 flex flex-col">
       <div className="border-b h-[60px] px-4 flex justify-between items-center">
         <h2 className="font-semibold">Conversations</h2>
         <Button variant="ghost" size="icon" onClick={onNewChat}>
