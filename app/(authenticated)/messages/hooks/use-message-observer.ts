@@ -1,7 +1,10 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { Message } from '../components/chat/messages';
+import { useEffect, useRef, useCallback } from "react";
+import { Message } from "../types";
 
-export default function useMessageObserver(messages: Message[], onMessageInView: (messageId: number) => void) {
+export default function useMessageObserver(
+  messages: Message[],
+  onMessageInView: (messageId: number) => void
+) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const visibleMessagesRef = useRef<Set<number>>(new Set());
@@ -11,7 +14,7 @@ export default function useMessageObserver(messages: Message[], onMessageInView:
       clearTimeout(timeoutRef.current);
     }
     timeoutRef.current = setTimeout(() => {
-      visibleMessagesRef.current.forEach(id => onMessageInView(id));
+      visibleMessagesRef.current.forEach((id) => onMessageInView(id));
       visibleMessagesRef.current.clear();
     }, 300);
   }, [onMessageInView]);

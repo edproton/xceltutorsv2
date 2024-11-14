@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { Conversation } from "./conversations";
+import { MessageContent } from "../../types";
 
 type ConversationItemProps = {
   conversation: Conversation;
@@ -24,6 +25,26 @@ export default function ConversationItem({
 }: ConversationItemProps) {
   const otherUser = conversation.other_user;
   const unreadCount = conversation.unread_count;
+
+  // Determine the preview text for the last message
+  const getLastMessagePreview = (
+    lastMessageContent: MessageContent[]
+  ): string => {
+    if (lastMessageContent.length === 0) return "No messages yet";
+
+    const lastContent = lastMessageContent[0];
+
+    switch (lastContent.type) {
+      case "text":
+        return lastContent.text;
+      case "card":
+        return `[Card: ${lastContent.title}]`;
+      default:
+        return "Unsupported message type";
+    }
+  };
+
+  const lastMessagePreview = getLastMessagePreview(conversation.last_message);
 
   return (
     <button
@@ -82,7 +103,7 @@ export default function ConversationItem({
           </Tooltip>
         </TooltipProvider>
         <div className="text-sm text-muted-foreground/60 truncate">
-          {conversation.last_message || "No messages yet"}
+          {lastMessagePreview}
         </div>
       </div>
     </button>

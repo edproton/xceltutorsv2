@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { TextMessage } from "../../types";
 
 type MessageInputProps = {
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: TextMessage[]) => void;
 };
 
 export default function MessageInput({ onSendMessage }: MessageInputProps) {
@@ -12,8 +13,18 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      onSendMessage(newMessage);
+    const trimmedMessage = newMessage.trim();
+
+    if (trimmedMessage) {
+      // Construct the content array with a single text message
+      const contentArray: TextMessage[] = [
+        {
+          type: "text",
+          text: trimmedMessage,
+        },
+      ];
+
+      onSendMessage(contentArray);
       setNewMessage("");
     }
   };

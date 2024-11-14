@@ -1,10 +1,10 @@
 import { memo, useMemo, useEffect, useRef } from "react";
-import { Message } from "../messages";
 import { format } from "date-fns";
 import MessageGroup from "./message-group";
 import useScrollManagement from "../../../hooks/use-scroll-management";
 import useMessageObserver from "../../../hooks/use-message-observer";
 import ScrollButton from "../scroll-button";
+import { Message } from "../../../types";
 
 type MessageListProps = {
   messages: Message[];

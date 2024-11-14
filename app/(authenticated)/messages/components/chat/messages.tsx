@@ -8,15 +8,6 @@ import MessageInput from "./message-input";
 import useMessages from "../../hooks/use-messages";
 import useConversation from "../../hooks/use-conversation";
 
-export type Message = {
-  id: number;
-  content: string;
-  from_profile_id: string;
-  created_at: string;
-  is_read: boolean;
-  conversation_id: number;
-};
-
 type MessagesProps = {
   currentUserId: string;
   conversationId: number | null;

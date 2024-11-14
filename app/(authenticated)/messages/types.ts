@@ -14,11 +14,27 @@ export type ConversationWithUnreadCount = {
   unread_message_ids: number[];
 };
 
-export type Message = {
+export interface TextMessage {
+  type: "text";
+  text: string;
+}
+
+export interface CardMessage {
+  type: "card";
+  title: string;
+  description: string;
+  url: string;
+  imageUrl?: string;
+}
+
+export type MessageContent = TextMessage | CardMessage;
+
+export interface Message {
   id: number;
   conversation_id: number;
   from_profile_id: string;
-  content: string;
+  content: MessageContent[];
   created_at: string;
   is_read: boolean;
-};
+  visible_to: "from" | "to" | "both";
+}

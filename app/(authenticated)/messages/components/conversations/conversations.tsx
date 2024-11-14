@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus } from "lucide-react";
 import { Profile } from "../../types";
 import ConversationItem from "./conversation-item";
+import { MessageContent } from "../../types";
 
 const supabase = createClient();
 
@@ -14,7 +15,7 @@ export type Conversation = {
   id: number;
   from_profile_id: string;
   to_profile_id: string;
-  last_message: string;
+  last_message: MessageContent[]; // Array of message content parts
   last_message_at: string;
   unread_count: number;
   other_user: Profile;
@@ -56,7 +57,8 @@ export default function Conversations({
         messages!inner (
           id,
           from_profile_id,
-          is_read
+          is_read,
+          content
         )
       `
       )
@@ -74,23 +76,33 @@ export default function Conversations({
             ? conv.to_profile
             : conv.from_profile;
 
-        // Calculate unread count manually from the messages
-        // This is not ideal and should be done in the database
+        // Calculate unread count
         const unreadCount = conv.messages.filter(
           (msg: { is_read: boolean; from_profile_id: string }) =>
             !msg.is_read &&
             msg.from_profile_id !== currentUserId &&
-            // Ensure the message is from the other participant in this conversation
             ((conv.from_profile_id === currentUserId &&
               msg.from_profile_id === conv.to_profile_id) ||
               (conv.to_profile_id === currentUserId &&
                 msg.from_profile_id === conv.from_profile_id))
         ).length;
 
+        // Determine the last message preview
+        const lastMessageContent =
+          conv.messages[conv.messages.length - 1]?.content || [];
+        const lastMessagePreview =
+          lastMessageContent[0]?.type === "text"
+            ? lastMessageContent[0].text
+            : lastMessageContent[0]?.type === "card"
+            ? lastMessageContent[0].title
+            : "No messages yet";
+
         return {
           ...conv,
           other_user: otherUser,
           unread_count: unreadCount,
+          last_message: lastMessageContent,
+          last_message_preview: lastMessagePreview,
         };
       });
       setConversations(processedConversations);
