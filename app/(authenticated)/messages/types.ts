@@ -19,7 +19,7 @@ export interface TextMessage {
   text: string;
 }
 
-type CardColor =
+export type CardColor =
   | "red"
   | "blue"
   | "green"

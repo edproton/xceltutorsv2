@@ -66,7 +66,7 @@ export const submitTutoringRequest = actionClient
 
     const messageContent: CardMessage = {
       title: `Free tutoring request from ${profileData.name}`,
-      description: `Date: ${parsedInput.meetingDate}, \nTime: ${parsedInput.meetingTime}`,
+      description: `Date: ${parsedInput.meetingDate} \nTime: <b>${parsedInput.meetingTime}</b>`,
       type: "card",
       actions: [
         {
