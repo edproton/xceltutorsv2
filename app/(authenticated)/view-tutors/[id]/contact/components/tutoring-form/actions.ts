@@ -71,7 +71,7 @@ export const submitTutoringRequest = actionClient
       actions: [
         {
           label: "Free booking details",
-          classes: "bg-green-500 hover:bg-green:400 text-white",
+          color: "green",
           callback: {
             name: "view-booking-details-dialog",
             params: {

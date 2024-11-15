@@ -19,13 +19,28 @@ export interface TextMessage {
   text: string;
 }
 
+type CardColor =
+  | "red"
+  | "blue"
+  | "green"
+  | "yellow"
+  | "purple"
+  | "gray"
+  | "pink"
+  | "teal"
+  | "cyan"
+  | "lime"
+  | "amber"
+  | "orange"
+  | "default";
+
 export interface CardMessage {
   type: "card";
   title: string;
   description: string;
   imageUrl?: string;
   actions?: {
-    color?: string;
+    color?: CardColor;
     label: string;
     url?: string;
     callback?: {
