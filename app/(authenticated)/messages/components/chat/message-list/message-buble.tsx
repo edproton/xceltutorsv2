@@ -76,7 +76,7 @@ export default function MessageBubble({
               <>
                 <CardHeader className="p-4">
                   <h3 className="text-xl font-bold">{item.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
                     {item.description}
                   </p>
                 </CardHeader>

@@ -16,7 +16,10 @@ export const getTutorById = cache(async (tutorId: string): Promise<Tutor> => {
         `
     )
     .eq("id", tutorId)
-    .single();
+    .single<{
+      id: string;
+      profiles: { name: string; avatar: string };
+    }>();
 
   if (error) {
     console.error(`Failed to fetch tutor data: ${error.message}`);

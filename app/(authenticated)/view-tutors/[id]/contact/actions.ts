@@ -24,7 +24,17 @@ async function getTutorWithGroupedServices(
     `
     )
     .eq("id", tutorId)
-    .single();
+    .single<{
+      id: string;
+      profiles: { name: string; avatar: string };
+      tutors_services: {
+        levels: {
+          id: number;
+          name: string;
+          subjects: { name: string } | { name: string }[];
+        };
+      }[];
+    }>();
 
   if (error) {
     throw new Error(`Failed to fetch tutor data: ${error.message}`);
@@ -37,7 +47,6 @@ async function getTutorWithGroupedServices(
   // Create a map to group subjects and levels
   const subjectMap = new Map<string, Set<Level>>();
 
-  // Populate the map
   data.tutors_services.forEach((service) => {
     const level = service.levels;
     if (level && level.subjects) {

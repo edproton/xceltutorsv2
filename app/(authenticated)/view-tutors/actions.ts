@@ -23,7 +23,37 @@ async function getTutorsPaginated(
     `
     )
     .order("created_at", { ascending: false })
-    .range(offset, offset + perPage - 1);
+    .range(offset, offset + perPage - 1)
+    .returns<
+      {
+        id: string;
+        metadata: {
+          bio: {
+            full: string;
+            short: string;
+            session: string;
+          };
+          completed_lessons: number;
+          reviews: number;
+          tags: string[];
+          trusted_by_schools: boolean;
+          degree: string;
+          grades: {
+            grade: string;
+            level: string;
+            subject: string;
+          }[];
+          university: string;
+        };
+        profiles: {
+          name: string;
+          avatar: string;
+        };
+        tutors_services: {
+          price: number;
+        }[];
+      }[]
+    >();
 
   if (tutorsQuery.error) {
     throw new Error(`Failed to fetch data: ${tutorsQuery.error.message}`);
@@ -49,25 +79,6 @@ async function getTutorsPaginated(
     totalItems: totalItems,
     totalPages: totalPages,
     items: tutorsQuery.data.map((item) => {
-      const metadata = item.metadata as {
-        bio: {
-          full: string;
-          short: string;
-          session: string;
-        };
-        tags: string[];
-        degree: string;
-        grades: Array<{
-          grade: string;
-          level: string;
-          subject: string;
-        }>;
-        reviews: number;
-        university: string;
-        completed_lessons: number;
-        trusted_by_schools: boolean;
-      };
-
       return {
         id: item.id,
         name: item.profiles?.name ?? "Unknown Tutor",
@@ -75,22 +86,22 @@ async function getTutorsPaginated(
         prices: item.tutors_services.map((service) => service.price),
         metadata: {
           bio: {
-            full: metadata?.bio?.full ?? "",
-            short: metadata?.bio?.short ?? "",
-            session: metadata?.bio?.session ?? "",
+            full: item.metadata?.bio?.full ?? "",
+            short: item.metadata?.bio?.short ?? "",
+            session: item.metadata?.bio?.session ?? "",
           },
-          completedLessons: metadata?.completed_lessons ?? 0,
-          reviews: metadata?.reviews ?? 0,
-          tags: metadata?.tags ?? [],
-          trustedBySchools: metadata?.trusted_by_schools ?? false,
-          degree: metadata?.degree ?? "",
+          completedLessons: item.metadata?.completed_lessons ?? 0,
+          reviews: item.metadata?.reviews ?? 0,
+          tags: item.metadata?.tags ?? [],
+          trustedBySchools: item.metadata?.trusted_by_schools ?? false,
+          degree: item.metadata?.degree ?? "",
           grades:
-            metadata?.grades?.map((grade) => ({
+            item.metadata?.grades?.map((grade) => ({
               grade: grade.grade,
               level: grade.level,
               subject: grade.subject,
             })) ?? [],
-          university: metadata?.university ?? "",
+          university: item.metadata?.university ?? "",
         },
       };
     }),

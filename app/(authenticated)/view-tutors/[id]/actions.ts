@@ -4,18 +4,58 @@ import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 import { TutorWithAvailabilityAndServices } from "./types";
 
+type TutorQuery = {
+  id: string;
+  metadata: {
+    bio: {
+      full: string;
+      short: string;
+      session: string;
+    };
+    completed_lessons: number;
+    reviews: number;
+    tags: string[];
+    trusted_by_schools: boolean;
+    degree: string;
+    grades: {
+      grade: string;
+      level: string;
+      subject: string;
+    }[];
+    university: string;
+  };
+  profiles: {
+    name: string;
+    avatar: string;
+  };
+  tutors_services: {
+    price: number;
+    levels: {
+      name: string;
+      subjects: {
+        name: string;
+      };
+    };
+  }[];
+  tutors_availabilities: {
+    weekday: string;
+    morning: boolean;
+    afternoon: boolean;
+    evening: boolean;
+  }[];
+};
+
 async function getTutorById(
   supabase: DbSupabaseClient,
   id: string
 ): Promise<TutorWithAvailabilityAndServices> {
-  // Step 1: Fetch tutor data with related profiles, services, and availabilities
   const tutorQuery = await supabase
     .from("tutors")
     .select(
       `
       id,
       metadata,
-      profiles (name, avatar),
+      profiles:profiles!inner (name, avatar),
       tutors_services (
         price,
         levels (name, subjects (name))
@@ -24,7 +64,7 @@ async function getTutorById(
     `
     )
     .eq("id", id)
-    .single();
+    .single<TutorQuery>();
 
   if (tutorQuery.error) {
     throw new Error(`Failed to fetch data: ${tutorQuery.error.message}`);
@@ -36,26 +76,8 @@ async function getTutorById(
     throw new Error(`Tutor with id ${id} not found`);
   }
 
-  const metadata = response.metadata as {
-    bio: {
-      full: string;
-      short: string;
-      session: string;
-    };
-    tags: string[];
-    degree: string;
-    grades: Array<{
-      grade: string;
-      level: string;
-      subject: string;
-    }>;
-    reviews: number;
-    university: string;
-    completed_lessons: number;
-    trusted_by_schools: boolean;
-  };
+  const metadata = response.metadata;
 
-  // Map the response to the expected structure
   const tutorWithDetails: TutorWithAvailabilityAndServices = {
     id: response.id,
     name: response.profiles?.name ?? "Unknown Tutor",

@@ -64,8 +64,6 @@ export const submitTutoringRequest = actionClient
       throw new Error("Failed to retrieve inserted conversation data");
     }
 
-    console.log("Conversation data:", conversationData);
-
     const messageContent: CardMessage = {
       title: `Free tutoring request from ${profileData.name}`,
       description: `Date: ${parsedInput.meetingDate}, \nTime: ${parsedInput.meetingTime}`,
@@ -89,7 +87,7 @@ export const submitTutoringRequest = actionClient
       .insert({
         conversation_id: conversationData.id,
         from_profile_id: user.id,
-        content: [JSON.stringify(messageContent)],
+        content: [messageContent],
         is_read: false,
       })
       .select()
