@@ -94,20 +94,6 @@ const config: Config = {
       },
     },
   },
-  safelist: [
-    {
-      pattern:
-        /bg-(red|green|blue|yellow|purple|gray|pink|indigo|teal|cyan|lime|amber|orange)-(100|200|300|400|500|600|700|800|900)/,
-      variants: ["hover", "focus"],
-    },
-    {
-      pattern:
-        /text-(red|green|blue|yellow|purple|gray|pink|indigo|teal|cyan|lime|amber|orange)-(100|200|300|400|500|600|700|800|900)/,
-    },
-    {
-      pattern: /p-(0|1|2|3|4|5|6|7|8|9|10|12|16|20)/,
-    },
-  ],
   plugins: [require("tailwindcss-animate")],
 };
 export default config;

@@ -25,7 +25,7 @@ export interface CardMessage {
   description: string;
   imageUrl?: string;
   actions?: {
-    classes?: string;
+    color?: string;
     label: string;
     url?: string;
     callback?: {

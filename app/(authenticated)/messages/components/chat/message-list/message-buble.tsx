@@ -28,6 +28,32 @@ function formatMessageTime(timestamp: string): string {
   });
 }
 
+export const getButtonClasses = (color: string): string => {
+  const colorClasses: Record<string, string> = {
+    red: "bg-red-500 hover:bg-red-600 text-white dark:bg-red-700 dark:hover:bg-red-800",
+    blue: "bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-700 dark:hover:bg-blue-800",
+    green:
+      "bg-green-500 hover:bg-green-600 text-white dark:bg-green-700 dark:hover:bg-green-800",
+    yellow:
+      "bg-yellow-500 hover:bg-yellow-600 text-black dark:bg-yellow-700 dark:hover:bg-yellow-800",
+    purple:
+      "bg-purple-500 hover:bg-purple-600 text-white dark:bg-purple-700 dark:hover:bg-purple-800",
+    gray: "bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-700 dark:hover:bg-gray-800",
+    pink: "bg-pink-500 hover:bg-pink-600 text-white dark:bg-pink-700 dark:hover:bg-pink-800",
+    teal: "bg-teal-500 hover:bg-teal-600 text-white dark:bg-teal-700 dark:hover:bg-teal-800",
+    cyan: "bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-700 dark:hover:bg-cyan-800",
+    lime: "bg-lime-500 hover:bg-lime-600 text-black dark:bg-lime-700 dark:hover:bg-lime-800",
+    amber:
+      "bg-amber-500 hover:bg-amber-600 text-black dark:bg-amber-700 dark:hover:bg-amber-800",
+    orange:
+      "bg-orange-500 hover:bg-orange-600 text-white dark:bg-orange-700 dark:hover:bg-orange-800",
+    default:
+      "bg-gray-300 hover:bg-gray-400 text-black dark:bg-gray-700 dark:hover:bg-gray-800",
+  };
+
+  return colorClasses[color] || colorClasses["default"];
+};
+
 export default function MessageBubble({
   message,
   isCurrentUser,
@@ -114,9 +140,9 @@ export default function MessageBubble({
                         return (
                           <Button
                             key={`action-${actionIndex}`}
-                            className={`text-xs px-2 py-1 rounded ${
-                              action.classes
-                            } ${
+                            className={`text-xs px-2 py-1 rounded ${getButtonClasses(
+                              action.color || "default"
+                            )} ${
                               item.actions && item.actions.length % 2 === 0
                                 ? "col-span-1"
                                 : "col-span-2"
