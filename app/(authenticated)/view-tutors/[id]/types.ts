@@ -15,6 +15,7 @@ export interface TutorWithAvailabilityAndServices {
   id: string;
   name: string;
   avatar: string;
+  hasAlreadyBeenContacted: boolean;
   metadata: {
     bio: {
       full: string;

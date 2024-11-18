@@ -64,7 +64,15 @@ const weekdayIndexMap = {
 };
 
 export default function ViewTutorsByIdPageContent({
-  tutor: { id, name, avatar, metadata, availabilities, services },
+  tutor: {
+    id,
+    name,
+    avatar,
+    metadata,
+    availabilities,
+    services,
+    hasAlreadyBeenContacted,
+  },
 }: {
   tutor: TutorWithAvailabilityAndServices;
 }) {
@@ -158,68 +166,70 @@ export default function ViewTutorsByIdPageContent({
 
   const Sidebar = () => (
     <div className="space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto pr-4 hide-scrollbar">
-      <Card className="overflow-hidden">
-        <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
-          <div className="text-center space-y-2">
-            <h3 className="font-semibold text-lg">
-              <Link href={`/view-tutors/${id}/contact`}>
-                Get in touch with {name.split(" ")[0]}
-              </Link>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Have a chat with {name.split(" ")[0]} and see how (and when!) they
-              can help
-            </p>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-semibold transition-all duration-200 transform hover:scale-105"
-                  size="lg"
-                  asChild
-                >
-                  <Link href={`/view-tutors/${id}/contact`}>
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Get in touch
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Start a conversation with Angel</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={`w-full hover:bg-primary/5 transition-colors duration-200 ${
-                    isBookmarked ? "text-primary" : ""
-                  }`}
-                  size="lg"
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                >
-                  {isBookmarked ? (
-                    <Heart className="mr-2 h-4 w-4 fill-primary" />
-                  ) : (
-                    <Heart className="mr-2 h-4 w-4" />
-                  )}
-                  {isBookmarked ? "Saved" : "Save profile"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>
-                  {isBookmarked
-                    ? "Remove from saved profiles"
-                    : "Save this profile for later"}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </CardContent>
-      </Card>
+      {!hasAlreadyBeenContacted && (
+        <Card className="overflow-hidden">
+          <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold text-lg">
+                <Link href={`/view-tutors/${id}/contact`}>
+                  Get in touch with {name.split(" ")[0]}
+                </Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Have a chat with {name.split(" ")[0]} and see how (and when!)
+                they can help
+              </p>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-semibold transition-all duration-200 transform hover:scale-105"
+                    size="lg"
+                    asChild
+                  >
+                    <Link href={`/view-tutors/${id}/contact`}>
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Get in touch
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Start a conversation with Angel</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={`w-full hover:bg-primary/5 transition-colors duration-200 ${
+                      isBookmarked ? "text-primary" : ""
+                    }`}
+                    size="lg"
+                    onClick={() => setIsBookmarked(!isBookmarked)}
+                  >
+                    {isBookmarked ? (
+                      <Heart className="mr-2 h-4 w-4 fill-primary" />
+                    ) : (
+                      <Heart className="mr-2 h-4 w-4" />
+                    )}
+                    {isBookmarked ? "Saved" : "Save profile"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {isBookmarked
+                      ? "Remove from saved profiles"
+                      : "Save this profile for later"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="w-full">
         <CardHeader>

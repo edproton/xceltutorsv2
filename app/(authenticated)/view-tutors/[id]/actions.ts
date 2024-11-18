@@ -49,6 +49,22 @@ async function getTutorById(
   supabase: DbSupabaseClient,
   id: string
 ): Promise<TutorWithAvailabilityAndServices> {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(`Failed to fetch user data: ${userError.message}`);
+  }
+
+  const { data: profileData, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", userData.user.id)
+    .single();
+
+  if (profileError) {
+    throw new Error(`Failed to fetch profile data: ${profileError.message}`);
+  }
+
   const tutorQuery = await supabase
     .from("tutors")
     .select(
@@ -82,6 +98,7 @@ async function getTutorById(
     id: response.id,
     name: response.profiles?.name ?? "Unknown Tutor",
     avatar: response.profiles?.avatar ?? "",
+    hasAlreadyBeenContacted: false,
     metadata: {
       bio: {
         full: metadata.bio?.full ?? "",
@@ -113,6 +130,23 @@ async function getTutorById(
       evening: availability.evening,
     })),
   };
+
+  const { data: freeBookingData, error: freeBookingError } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("tutor_id", id)
+    .eq("created_by_profile_id", profileData.id)
+    .eq("type", "Free Meeting")
+    .maybeSingle();
+
+  if (freeBookingError) {
+    throw new Error(
+      `Failed to get free booking data: ${freeBookingError.message}`
+    );
+  }
+  if (freeBookingData) {
+    tutorWithDetails.hasAlreadyBeenContacted = true;
+  }
 
   return tutorWithDetails;
 }
