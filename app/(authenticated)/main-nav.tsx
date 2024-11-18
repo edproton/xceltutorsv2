@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Loader2, Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,9 +12,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function MainNav() {
+interface MainNavProps {
+  name: string;
+  avatar: string | null;
+}
+
+export default function MainNav({ name, avatar }: MainNavProps) {
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      router.push("/"); // Redirect to login page after successful logout
+    } catch (error) {
+      console.error("Error logging out:", error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const routes = [
     {
@@ -42,6 +69,15 @@ export default function MainNav() {
       label: "Refer a friend",
     },
   ];
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,7 +108,10 @@ export default function MainNav() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <User className="h-5 w-5" />
+                <Avatar className="h-8 w-8">
+                  {avatar && <AvatarImage src={avatar} alt={name} />}
+                  <AvatarFallback>{getInitials(name)}</AvatarFallback>
+                </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -83,8 +122,19 @@ export default function MainNav() {
               <DropdownMenuItem asChild>
                 <Link href="/settings">Settings</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/logout">Logout</Link>
+              <DropdownMenuItem
+                onClick={handleLogout}
+                disabled={isLoading}
+                className="cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging out...
+                  </>
+                ) : (
+                  "Logout"
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
