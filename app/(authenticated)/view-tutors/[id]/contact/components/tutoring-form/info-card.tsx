@@ -93,8 +93,8 @@ export default function InfoCard({ tutor, watchedFields }: InfoCardProps) {
                     value={
                       watchedFields.frequency === "weekly"
                         ? "Weekly"
-                        : watchedFields.frequency === "biweekly"
-                        ? "Bi-weekly"
+                        : watchedFields.frequency === "fortnightly"
+                        ? "Fortnightly"
                         : watchedFields.frequency === "monthly"
                         ? "Monthly"
                         : "Undecided"

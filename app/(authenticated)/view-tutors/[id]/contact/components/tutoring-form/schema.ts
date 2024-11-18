@@ -16,7 +16,7 @@ export const tutoringFormSchema = z.object({
     .string({ required_error: "Please select a meeting time" })
     .min(1, "Please select a meeting time"),
   frequency: z
-    .enum(["weekly", "biweekly", "monthly", "undecided"])
+    .enum(["weekly", "fortnightly", "monthly", "undecided"])
     .optional()
     .default("undecided"),
 });

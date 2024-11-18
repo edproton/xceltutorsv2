@@ -30,7 +30,7 @@ export default function FrequencySelect({ control }: FrequencySelectProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="biweekly">Bi-weekly</SelectItem>
+              <SelectItem value="fortnightly">Fortnightly</SelectItem>
               <SelectItem value="monthly">Monthly</SelectItem>
               <SelectItem value="undecided">{`I'll decide later`}</SelectItem>
             </SelectContent>
