@@ -35,7 +35,7 @@ export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
       formProps: {
         defaultValues: {
           tutorId: tutor.id,
-          levelId: "",
+          levelId: undefined,
           message: "",
           meetingDate: undefined,
           meetingTime: undefined,

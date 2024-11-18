@@ -12,7 +12,7 @@ import { TutorInfo } from "../../types";
 import DetailItem from "./detail-item";
 
 interface WatchedFields {
-  levelId?: string;
+  levelId?: number;
   meetingDate?: Date;
   meetingTime?: string;
   frequency?: string;
@@ -34,7 +34,7 @@ export default function InfoCard({ tutor, watchedFields }: InfoCardProps) {
     if (!watchedFields.levelId) return null;
     for (const subject of tutor.subjects) {
       for (const level of subject.levels) {
-        if (level.id.toString() === watchedFields.levelId) {
+        if (level.id === watchedFields.levelId) {
           return { subject: subject.name, level: level.name };
         }
       }

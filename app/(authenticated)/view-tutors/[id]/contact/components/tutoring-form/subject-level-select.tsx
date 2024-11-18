@@ -76,7 +76,7 @@ export default function SubjectLevelSelect({
                         key={`${subject.name}-${level.id}`}
                         value={`${subject.name}-${level.name}`}
                         onSelect={() => {
-                          field.onChange(level.id.toString());
+                          field.onChange(level.id);
                           setSelectedSubjectLevel(
                             `${subject.name} - ${level.name}`
                           );

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
   Clock,
@@ -13,16 +12,17 @@ import {
   RepeatIcon,
   User,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { DateTime } from "luxon";
 
 interface TutoringData {
-  tutorName: string;
-  tutorAvatar: string;
+  createdByName: string;
   levelName: string;
   subjectName: string;
   meetingDate: string;
   meetingTime: string;
-  frequency: string;
-  message: string;
+  endTime: string;
+  status: string;
 }
 
 interface TutoringDetailsDialogProps {
@@ -33,7 +33,7 @@ interface TutoringDetailsDialogProps {
   setTitle: (title: string) => void;
 }
 
-export default function TutoringDetailsDialog({
+export default function Component({
   params,
   onClose,
   setTitle,
@@ -46,131 +46,198 @@ export default function TutoringDetailsDialog({
 
     const fetchTutoringData = async () => {
       setIsLoading(true);
-      // Simulate API call
-      // Mock tutoring data
-      const mockData: TutoringData = {
-        tutorName: "Dr. Jane Smith",
-        tutorAvatar: "https://example.com/avatar.jpg",
-        levelName: "Advanced",
-        subjectName: "Mathematics",
-        meetingDate: "2023-06-15",
-        meetingTime: "14:00",
-        frequency: "weekly",
-        message:
-          "I need help with advanced calculus concepts, particularly with multivariable calculus and vector analysis.",
-      };
-      setTutoringData(mockData);
+
+      const { data, error } = await createClient()
+        .from("bookings")
+        .select(
+          `
+          id,
+          start_time,
+          end_time,
+          status,
+          metadata->levelId,
+          created_by:profiles!bookings_created_by_profile_id_fkey (
+            name
+          )
+        `
+        )
+        .eq("id", params.bookingId)
+        .single<{
+          id: number;
+          start_time: string;
+          end_time: string;
+          status: string;
+          levelId: number;
+          created_by: {
+            name: string;
+          };
+        }>();
+
+      if (error) {
+        console.error("Error fetching booking details:", error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data) {
+        const levelId = data.levelId;
+        let levelName = "N/A";
+        let subjectName = "N/A";
+
+        if (levelId) {
+          const { data: levelData, error: levelError } = await createClient()
+            .from("levels")
+            .select(
+              `
+              id,
+              name,
+              subjects (name)
+            `
+            )
+            .eq("id", levelId)
+            .single<{
+              id: number;
+              name: string;
+              subjects: {
+                name: string;
+              };
+            }>();
+
+          if (levelError) {
+            console.error("Error fetching level details:", levelError);
+          } else if (levelData) {
+            levelName = levelData.name;
+            subjectName = levelData.subjects.name || "N/A";
+          }
+        }
+
+        const startTime = DateTime.fromISO(data.start_time);
+        const endTime = DateTime.fromISO(data.end_time);
+        const meetingDate = startTime.toLocaleString(DateTime.DATE_MED);
+        const meetingTime = startTime.toFormat("h:mm a");
+        const endTimeFormatted = endTime.toFormat("h:mm a");
+
+        setTutoringData({
+          createdByName: data.created_by?.name || "Unknown User",
+          levelName,
+          subjectName,
+          meetingDate,
+          meetingTime,
+          endTime: endTimeFormatted,
+          status: data.status || "Pending",
+        });
+      }
+
       setIsLoading(false);
     };
 
     fetchTutoringData();
-  }, [setTitle]);
+  }, [params.bookingId, setTitle]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "Confirmed":
+        return "success";
+      case "Pending":
+        return "warning";
+      case "Canceled":
+        return "destructive";
+      case "Completed":
+        return "secondary";
+      default:
+        return "default";
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
+      <div className="space-y-2">
         {isLoading ? (
-          <>
-            <div className="h-16 w-16 rounded-full bg-muted animate-pulse" />
-            <div className="space-y-2">
-              <div className="h-6 w-[200px] bg-muted animate-pulse rounded" />
-              <div className="h-4 w-[150px] bg-muted animate-pulse rounded" />
-            </div>
-          </>
+          <div className="space-y-2">
+            <div className="h-7 w-[200px] bg-muted animate-pulse rounded" />
+            <div className="h-5 w-[150px] bg-muted animate-pulse rounded" />
+          </div>
         ) : (
           <>
-            <Avatar className="h-16 w-16">
-              <AvatarImage
-                src={tutoringData?.tutorAvatar}
-                alt={tutoringData?.tutorName}
-              />
-              <AvatarFallback>
-                <User className="h-8 w-8" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">
-                {tutoringData?.tutorName || "Unknown Tutor"}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Booking ID: {params.bookingId}
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Booking ID: {params.bookingId}
+            </p>
           </>
         )}
       </div>
       <Separator />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
+          {
+            icon: User,
+            label: "Created By",
+            value: tutoringData?.createdByName,
+          },
           {
             icon: GraduationCap,
             label: "Level",
             value: tutoringData?.levelName,
           },
           { icon: Book, label: "Subject", value: tutoringData?.subjectName },
+          { icon: Calendar, label: "Date", value: tutoringData?.meetingDate },
           {
-            icon: Calendar,
-            label: "Date",
-            value: tutoringData?.meetingDate
-              ? formatDate(tutoringData.meetingDate)
-              : "",
-          },
-          { icon: Clock, label: "Time", value: tutoringData?.meetingTime },
-          {
-            icon: RepeatIcon,
-            label: "Frequency",
-            value: tutoringData?.frequency
-              ? capitalizeFirstLetter(tutoringData.frequency)
-              : "",
+            icon: Clock,
+            label: "Time",
+            value: `${tutoringData?.meetingTime} - ${tutoringData?.endTime}`,
           },
         ].map((item, index) => (
-          <div key={index} className="space-y-2">
+          <div
+            key={index}
+            className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50"
+          >
             {isLoading ? (
               <>
-                <div className="h-4 w-[100px] bg-muted animate-pulse rounded" />
-                <div className="h-6 w-[150px] bg-muted animate-pulse rounded" />
+                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-[100px] bg-muted animate-pulse rounded" />
+                  <div className="h-6 w-[150px] bg-muted animate-pulse rounded" />
+                </div>
               </>
             ) : (
               <>
-                <div className="flex items-center space-x-2">
-                  <item.icon className="h-4 w-4" />
-                  <span className="text-sm font-medium">{item.label}:</span>
+                <item.icon className="h-5 w-5 mt-0.5 text-muted-foreground" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
+                  <p className="text-sm">{item.value}</p>
                 </div>
-                <p className="text-sm">{item.value}</p>
               </>
             )}
           </div>
         ))}
       </div>
-      <Separator />
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{`Student's Message`}</h3>
-        <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-          {isLoading ? (
-            <div className="space-y-2">
-              <div className="h-4 w-full bg-muted animate-pulse rounded" />
-              <div className="h-4 w-full bg-muted animate-pulse rounded" />
-              <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+      <div className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50">
+        {isLoading ? (
+          <>
+            <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+            <div className="space-y-2 flex-1">
+              <div className="h-4 w-[100px] bg-muted animate-pulse rounded" />
+              <div className="h-6 w-[150px] bg-muted animate-pulse rounded" />
             </div>
-          ) : (
-            <p className="text-sm">{tutoringData?.message}</p>
-          )}
-        </ScrollArea>
+          </>
+        ) : (
+          <>
+            <RepeatIcon className="h-5 w-5 mt-0.5 text-muted-foreground" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                Status
+              </p>
+              <Badge variant={getStatusBadgeVariant(tutoringData!.status)}>
+                {tutoringData?.status}
+              </Badge>
+            </div>
+          </>
+        )}
       </div>
+      <Separator />
       <div className="flex justify-end">
-        <Button onClick={onClose} disabled={isLoading}>
+        <Button onClick={onClose} variant="default" disabled={isLoading}>
           {isLoading ? "Loading..." : "Close"}
         </Button>
       </div>

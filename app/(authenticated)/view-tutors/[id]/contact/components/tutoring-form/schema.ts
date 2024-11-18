@@ -2,7 +2,11 @@ import { z } from "zod";
 
 export const tutoringFormSchema = z.object({
   tutorId: z.string().uuid("Invalid tutor ID"),
-  levelId: z.string().min(1, "Please select a level"),
+  levelId: z
+    .number({
+      required_error: "Subject and level are required",
+    })
+    .min(1, "Please select a level"),
   message: z
     .string()
     .min(1, "Message is required")
