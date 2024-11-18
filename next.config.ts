@@ -6,7 +6,12 @@ import "@/env";
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    domains: ["rlqvhmhinnazuijrkrwq.supabase.co"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "rlqvhmhinnazuijrkrwq.supabase.co",
+      },
+    ],
   },
 };
 

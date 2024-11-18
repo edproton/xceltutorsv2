@@ -28,6 +28,11 @@ type TableExtensions = {
       trusted_by_schools: boolean;
     };
   };
+  bookings: {
+    metadata: {
+      levelId: number;
+    };
+  };
 };
 // <END>
 
