@@ -30,7 +30,6 @@ export default function Messages({
     const loadConversation = async () => {
       const conversationData = await fetchConversation(conversationId);
 
-      console.log(conversationData);
       if (conversationData) {
         setOtherProfile(conversationData.profile as Profile);
       }

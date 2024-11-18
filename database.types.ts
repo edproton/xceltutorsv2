@@ -19,6 +19,8 @@ export type Database = {
           end_time: string
           id: number
           metadata: Json | null
+          payment_intent_id: string | null
+          payment_status: string | null
           price: number | null
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -35,6 +37,8 @@ export type Database = {
           end_time: string
           id?: number
           metadata?: Json | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
           price?: number | null
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -51,6 +55,8 @@ export type Database = {
           end_time?: string
           id?: number
           metadata?: Json | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
           price?: number | null
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -348,7 +354,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      booking_status: "Pending" | "Confirmed" | "Canceled" | "Completed"
+      booking_status:
+        | "PendingDate"
+        | "WaitingPayment"
+        | "PaymentFailed"
+        | "Confirmed"
+        | "Canceled"
+        | "Completed"
       booking_type: "Free Meeting" | "Lesson" | "Group Lesson"
       participant_role: "Student" | "Tutor"
     }

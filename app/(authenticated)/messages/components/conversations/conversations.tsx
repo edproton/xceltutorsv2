@@ -15,7 +15,7 @@ export type Conversation = {
   id: number;
   from_profile_id: string;
   to_profile_id: string;
-  last_message: MessageContent[]; // Array of message content parts
+  last_message: MessageContent[];
   last_message_at: string;
   unread_count: number;
   other_user: Profile;
@@ -158,6 +158,7 @@ export default function Conversations({
               conversation={conversation}
               isSelected={selectedConversationId === conversation.id}
               onSelect={() => onSelectConversation(conversation.id)}
+              currentUserId={currentUserId}
             />
           ))}
         </div>

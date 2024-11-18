@@ -9,17 +9,11 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CheckCheck, ExternalLink } from "lucide-react";
+import { Check, CheckCheck, Eye, EyeOff, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { CardColor, Message, MessageContent } from "../../../types";
 import { CallbackDialog } from "./callback-dialog";
 import DOMPurify from "dompurify";
-
-function sanitizeHTML(html: string) {
-  return {
-    __html: DOMPurify.sanitize(html),
-  };
-}
 
 interface MessageBubbleProps {
   message: Message;
@@ -30,9 +24,16 @@ interface MessageBubbleProps {
 
 function formatMessageTime(timestamp: string): string {
   return new Date(timestamp).toLocaleTimeString([], {
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
+    hour12: true,
   });
+}
+
+function sanitizeHTML(html: string) {
+  return {
+    __html: DOMPurify.sanitize(html),
+  };
 }
 
 export const getButtonClasses = (color: CardColor): string => {
@@ -79,6 +80,25 @@ export default function MessageBubble({
     setIsDialogOpen(true);
   };
 
+  const getVisibilityInfo = (visibility: "from" | "to" | "both") => {
+    switch (visibility) {
+      case "from":
+        return {
+          icon: <Eye className="h-3 w-3" />,
+          text: "Only visible to you",
+        };
+      case "to":
+        return {
+          icon: <EyeOff className="h-3 w-3" />,
+          text: "Only visible to recipient",
+        };
+      default:
+        return null;
+    }
+  };
+
+  const visibilityInfo = getVisibilityInfo(message.visible_to);
+
   return (
     <div
       id={`message-${message.id}`}
@@ -90,6 +110,12 @@ export default function MessageBubble({
         <span className="text-xs font-medium text-muted-foreground mb-1">
           {senderName}
         </span>
+      )}
+      {visibilityInfo && (
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+          {visibilityInfo.icon}
+          <span>{visibilityInfo.text}</span>
+        </div>
       )}
       <div className="max-w-[75%]">
         {message.content.map((item: MessageContent, index) => (

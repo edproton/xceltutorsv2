@@ -52,6 +52,8 @@ export interface CardMessage {
 
 export type MessageContent = TextMessage | CardMessage;
 
+export type VisibleTo = "from" | "to" | "both";
+
 export interface Message {
   id: number;
   conversation_id: number;
@@ -59,5 +61,5 @@ export interface Message {
   content: MessageContent[];
   created_at: string;
   is_read: boolean;
-  visible_to: "from" | "to" | "both";
+  visible_to: VisibleTo;
 }

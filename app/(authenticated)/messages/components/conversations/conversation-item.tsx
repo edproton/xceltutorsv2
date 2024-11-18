@@ -11,22 +11,28 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Conversation } from "./conversations";
 import { MessageContent } from "../../types";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  ArrowUpDownIcon as ArrowsUpDown,
+} from "lucide-react";
 
 type ConversationItemProps = {
   conversation: Conversation;
   isSelected: boolean;
   onSelect: () => void;
+  currentUserId: string;
 };
 
 export default function ConversationItem({
   conversation,
   isSelected,
   onSelect,
+  currentUserId,
 }: ConversationItemProps) {
   const otherUser = conversation.other_user;
   const unreadCount = conversation.unread_count;
 
-  // Determine the preview text for the last message
   const getLastMessagePreview = (
     lastMessageContent: MessageContent[]
   ): string => {
@@ -45,6 +51,21 @@ export default function ConversationItem({
   };
 
   const lastMessagePreview = getLastMessagePreview(conversation.last_message);
+
+  const getMessageVisibility = (): { icon: React.ReactNode; label: string } => {
+    const isFromCurrentUser = conversation.from_profile_id === currentUserId;
+    const isToCurrentUser = conversation.to_profile_id === currentUserId;
+
+    if (isFromCurrentUser && isToCurrentUser) {
+      return { icon: <ArrowsUpDown className="h-4 w-4" />, label: "Both" };
+    } else if (isFromCurrentUser) {
+      return { icon: <ArrowUpRight className="h-4 w-4" />, label: "From" };
+    } else {
+      return { icon: <ArrowDownLeft className="h-4 w-4" />, label: "To" };
+    }
+  };
+
+  const messageVisibility = getMessageVisibility();
 
   return (
     <button
@@ -102,8 +123,20 @@ export default function ConversationItem({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="text-sm text-muted-foreground/60 truncate">
-          {lastMessagePreview}
+        <div className="text-sm text-muted-foreground/60 truncate flex items-center space-x-1">
+          <span>{lastMessagePreview}</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground/40">
+                  {messageVisibility.icon}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start">
+                <p>{messageVisibility.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </button>

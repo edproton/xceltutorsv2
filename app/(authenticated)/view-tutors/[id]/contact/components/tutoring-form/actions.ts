@@ -2,49 +2,46 @@
 
 import { actionClient } from "@/lib/safe-action";
 import { tutoringFormSchema } from "./schema";
-import { createClient } from "@/lib/supabase/server";
-import { CardMessage } from "@/app/(authenticated)/messages/types";
+import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
+import {
+  CardMessage,
+  MessageContent,
+  TextMessage,
+  VisibleTo,
+} from "@/app/(authenticated)/messages/types";
 import { redirect } from "next/navigation";
 import { DateTime } from "luxon";
+import { revalidatePath } from "next/cache";
 
 export const submitTutoringRequest = actionClient
   .schema(tutoringFormSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-
+    // Get the current user
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("Failed to get user data");
 
-    if (userError || !user) {
-      throw new Error("Failed to get user data");
-    }
-
-    const { data: profileData, error: profileError } = await supabase
+    // Get the user's profile
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id, name")
       .eq("id", user.id)
       .single();
 
-    if (profileError) {
-      console.error("Profile select error:", profileError);
-      throw new Error("Failed to get profile data");
-    }
+    if (profileError) throw new Error("Failed to get profile data");
 
-    const profileId = profileData.id;
-
+    // Get the tutor's profile
     const { data: tutorData, error: tutorError } = await supabase
       .from("tutors")
-      .select("profile_id, id")
+      .select("profile_id")
       .eq("id", parsedInput.tutorId)
       .single();
 
-    if (tutorError) {
+    if (tutorError)
       throw new Error(`Tutor with id ${parsedInput.tutorId} does not exist`);
-    }
-
-    const tutorProfileId = tutorData.profile_id;
 
     const meetingDate = DateTime.fromJSDate(parsedInput.meetingDate, {
       zone: "Europe/London",
@@ -64,7 +61,7 @@ export const submitTutoringRequest = actionClient
         .or(
           `and(start_time.lte.${endTimeUTC.toISO()},end_time.gte.${startTimeUTC.toISO()})`
         )
-        .eq("tutor_id", tutorData.id)
+        .eq("tutor_id", parsedInput.tutorId)
         .maybeSingle();
 
     if (existingBookingError) {
@@ -82,12 +79,12 @@ export const submitTutoringRequest = actionClient
     const { data: bookingData, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        tutor_id: tutorData.id,
-        created_by_profile_id: profileId,
+        tutor_id: parsedInput.tutorId,
+        created_by_profile_id: profile.id,
         type: "Free Meeting",
         start_time: startTimeUTC.toISO()!,
         end_time: endTimeUTC.toISO()!,
-        status: "Pending",
+        status: "PendingDate",
         metadata: {
           levelId: parsedInput.levelId,
         },
@@ -103,15 +100,19 @@ export const submitTutoringRequest = actionClient
     const { data: conversationData, error: conversationError } = await supabase
       .from("conversations")
       .insert({
-        from_profile_id: profileId,
-        to_profile_id: tutorProfileId,
+        from_profile_id: profile.id,
+        to_profile_id: tutorData.profile_id,
       })
-      .select()
+      .select("id")
       .single();
 
     if (conversationError) {
-      console.error("Conversation insert error:", conversationError);
-      throw new Error("Failed to create conversation");
+      if (conversationError.code === "23505") {
+        throw new Error("A conversation with this tutor already exists");
+      } else {
+        console.error("Conversation insert error:", conversationError);
+        throw new Error("Failed to create conversation");
+      }
     }
 
     if (!conversationData) {
@@ -121,13 +122,12 @@ export const submitTutoringRequest = actionClient
 
     const meetingStartDateFormatted = meetingStartTime.toLocaleString(
       DateTime.DATE_MED
-    ); // e.g., "Nov 18, 2024"
+    );
     const meetingStartTimeFormatted = meetingStartTime.toFormat("h:mm a");
     const meetingEndTimeFormatted = meetingEndTime.toFormat("h:mm a");
 
-    // Create the CardMessage content
-    const messageContent: CardMessage = {
-      title: `📅 Free Tutoring Request from ${profileData.name}`,
+    const cardMessageContent: CardMessage = {
+      title: `📅 Free Tutoring Request from ${profile.name}`,
       description: `<b>Date:</b> ${meetingStartDateFormatted}\n<b>Time:</b> ${meetingStartTimeFormatted} - ${meetingEndTimeFormatted}`,
       type: "card",
       actions: [
@@ -144,21 +144,68 @@ export const submitTutoringRequest = actionClient
       ],
     };
 
-    const { error: messageError } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: conversationData.id,
-        from_profile_id: user.id,
-        content: [messageContent],
-        is_read: false,
-      })
-      .select()
-      .single();
+    const message = {
+      conversationId: conversationData.id,
+      fromProfileId: user.id,
+    };
 
-    if (messageError) {
-      console.error("Message insert error:", messageError);
-      throw new Error("Failed to send message");
+    const { error: cardMessageError } = await sendMessage(supabase, {
+      ...message,
+      content: [cardMessageContent],
+      visibleTo: "to",
+    });
+
+    if (cardMessageError) {
+      console.error("Card message insert error:", cardMessageError);
+      throw new Error("Failed to send card message");
     }
 
+    const textMessageContent: TextMessage = {
+      text: parsedInput.message,
+      type: "text",
+    };
+
+    const { error: textMessageError } = await sendMessage(supabase, {
+      ...message,
+      content: [textMessageContent],
+      visibleTo: "both",
+    });
+
+    if (textMessageError) {
+      console.error("Text message insert error:", textMessageError);
+      throw new Error("Failed to send text message");
+    }
+
+    revalidatePath(`tutor-${parsedInput.tutorId}`);
     redirect(`/view-tutors/${parsedInput.tutorId}/contact/confirmation`);
   });
+
+async function sendMessage(
+  supabase: DbSupabaseClient,
+  {
+    conversationId,
+    fromProfileId,
+    content,
+    visibleTo,
+  }: {
+    conversationId: number;
+    fromProfileId: string;
+    content: MessageContent[];
+    visibleTo: VisibleTo;
+  }
+) {
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    from_profile_id: fromProfileId,
+    content: [...content],
+    visible_to: visibleTo,
+    is_read: false,
+  });
+
+  if (error) {
+    console.error("Message insert error:", error.message);
+    throw new Error("Failed to send message");
+  }
+
+  return { error };
+}
