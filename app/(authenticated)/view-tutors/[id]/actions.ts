@@ -156,5 +156,5 @@ export async function getTutorByIdCached(
 ): Promise<TutorWithAvailabilityAndServices> {
   const supabase = await createClient();
 
-  return unstable_cache(() => getTutorById(supabase, id), [`tutor-${id}`])();
+  return getTutorById(supabase, id);
 }

@@ -11,7 +11,6 @@ import {
 } from "@/app/(authenticated)/messages/types";
 import { redirect } from "next/navigation";
 import { DateTime } from "luxon";
-import { revalidatePath } from "next/cache";
 
 export const submitTutoringRequest = actionClient
   .schema(tutoringFormSchema)
@@ -176,7 +175,6 @@ export const submitTutoringRequest = actionClient
       throw new Error("Failed to send text message");
     }
 
-    revalidatePath(`tutor-${parsedInput.tutorId}`);
     redirect(`/view-tutors/${parsedInput.tutorId}/contact/confirmation`);
   });
 
