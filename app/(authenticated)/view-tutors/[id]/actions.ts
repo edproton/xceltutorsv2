@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
-import { unstable_cache } from "next/cache";
 import { TutorWithAvailabilityAndServices } from "./types";
 
 type TutorQuery = {
