@@ -1,32 +1,24 @@
-export interface TutorWithPrices {
-  id: string;
-  name: string;
-  avatar: string;
-  prices: number[];
-  metadata: {
-    bio: {
-      full: string;
-      short: string;
-      session: string;
-    };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    trustedBySchools: boolean;
-    degree: string;
-    grades: Array<{
-      grade: string;
-      level: string;
-      subject: string;
-    }>;
-    university: string;
-  };
-}
-
 export interface PageResponse<T> {
   page: number;
   perPage: number;
   totalItems: number;
   totalPages: number;
   items: T[];
+}
+
+export type PriceRange =
+  | { min: number; max: number } // When prices are different
+  | { value: number }; // When prices are the same
+
+export interface TutorQueryResult {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  priceRange: PriceRange;
+  bioShort: string;
+  tags: string[];
+  degree: string;
+  university: string;
+  completedLessons: number;
+  reviews: number;
 }

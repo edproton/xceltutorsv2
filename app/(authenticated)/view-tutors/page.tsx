@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ViewTutorsPage from "./page-content";
 import { redirect } from "next/navigation";
-import { getTutorsPaginatedCached } from "./actions";
+import { getTutorsPaginated, getTutorsPaginatedCached } from "./actions";
 
 type SearchParams = {
   page?: string;
@@ -36,7 +36,7 @@ export default async function ViewTutorsPageWrapper({
   const { page } = await searchParams;
 
   const pageNumber = parsePageNumber(page);
-  const tutors = await getTutorsPaginatedCached(pageNumber);
+  const tutors = await getTutorsPaginated(pageNumber);
 
   if (pageNumber > tutors.totalPages) {
     redirect(`/view-tutors?page=${tutors.totalPages}`);

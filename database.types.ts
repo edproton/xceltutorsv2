@@ -93,7 +93,6 @@ export type Database = {
           created_at: string | null
           from_profile_id: string | null
           id: number
-          last_message: string | null
           last_message_at: string
           to_profile_id: string | null
         }
@@ -101,7 +100,6 @@ export type Database = {
           created_at?: string | null
           from_profile_id?: string | null
           id?: number
-          last_message?: string | null
           last_message_at?: string
           to_profile_id?: string | null
         }
@@ -109,7 +107,6 @@ export type Database = {
           created_at?: string | null
           from_profile_id?: string | null
           id?: number
-          last_message?: string | null
           last_message_at?: string
           to_profile_id?: string | null
         }
@@ -161,27 +158,27 @@ export type Database = {
           content: Json
           conversation_id: number | null
           created_at: string | null
-          from_profile_id: string | null
           id: number
           is_read: boolean
+          sender_profile_id: string
           visible_to: string | null
         }
         Insert: {
           content?: Json
           conversation_id?: number | null
           created_at?: string | null
-          from_profile_id?: string | null
           id?: number
           is_read?: boolean
+          sender_profile_id: string
           visible_to?: string | null
         }
         Update: {
           content?: Json
           conversation_id?: number | null
           created_at?: string | null
-          from_profile_id?: string | null
           id?: number
           is_read?: boolean
+          sender_profile_id?: string
           visible_to?: string | null
         }
         Relationships: [
@@ -193,8 +190,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "messages_from_profile_id_fkey"
-            columns: ["from_profile_id"]
+            foreignKeyName: "messages_sender_profile_id_fkey"
+            columns: ["sender_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

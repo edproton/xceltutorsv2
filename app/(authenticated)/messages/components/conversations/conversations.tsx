@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { Profile } from "../../types";
 import ConversationItem from "./conversation-item";
 import { MessageContent } from "../../types";
+import { getConversations } from "./actions";
 
 const supabase = createClient();
 
@@ -39,6 +40,7 @@ export default function Conversations({
   const fetchConversations = useCallback(async () => {
     if (!currentUserId) return;
 
+    await getConversations();
     const { data, error } = await supabase
       .from("conversations")
       .select(
@@ -56,7 +58,7 @@ export default function Conversations({
         ),
         messages!inner (
           id,
-          from_profile_id,
+          sender_profile_id,
           is_read,
           content
         )
@@ -78,13 +80,13 @@ export default function Conversations({
 
         // Calculate unread count
         const unreadCount = conv.messages.filter(
-          (msg: { is_read: boolean; from_profile_id: string }) =>
+          (msg: { is_read: boolean; sender_profile_id: string }) =>
             !msg.is_read &&
-            msg.from_profile_id !== currentUserId &&
-            ((conv.from_profile_id === currentUserId &&
-              msg.from_profile_id === conv.to_profile_id) ||
+            msg.sender_profile_id !== currentUserId &&
+            ((conv.sender_profile_id === currentUserId &&
+              msg.sender_profile_id === conv.to_profile_id) ||
               (conv.to_profile_id === currentUserId &&
-                msg.from_profile_id === conv.from_profile_id))
+                msg.sender_profile_id === conv.from_profile_id))
         ).length;
 
         // Determine the last message preview

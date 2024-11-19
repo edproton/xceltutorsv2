@@ -18,7 +18,7 @@ export default function useMessages(
       const { data: messagesData, error: messagesError } = await supabase
         .from("messages")
         .select(
-          "id, conversation_id, from_profile_id, content, created_at, is_read, visible_to"
+          "id, conversation_id, sender_profile_id, content, created_at, is_read, visible_to"
         )
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
@@ -76,7 +76,7 @@ export default function useMessages(
           .from("messages")
           .insert({
             conversation_id: conversationId,
-            from_profile_id: currentUserId,
+            sender_profile_id: currentUserId,
             content: contentArray,
             is_read: false,
           })
@@ -91,17 +91,9 @@ export default function useMessages(
             setMessages((prev) => [...prev, message]);
           }
 
-          // Update the conversation with a preview of the last message
-          const lastMessagePreview = contentArray
-            .map((item) =>
-              item.type === "text" ? item.text : `[Card: ${item.title}]`
-            )
-            .join(" ");
-
           await supabase
             .from("conversations")
             .update({
-              last_message: lastMessagePreview,
               last_message_at: new Date().toISOString(),
             })
             .eq("id", conversationId);
@@ -122,7 +114,7 @@ export default function useMessages(
 
         if (
           messageToUpdate &&
-          messageToUpdate.from_profile_id !== currentUserId &&
+          messageToUpdate.sender_profile_id !== currentUserId &&
           !messageToUpdate.is_read
         ) {
           const { data, error } = await supabase
@@ -156,7 +148,7 @@ export default function useMessages(
         .from("messages")
         .update({ is_read: true })
         .eq("conversation_id", conversationId)
-        .neq("from_profile_id", currentUserId)
+        .neq("sender_profile_id", currentUserId)
         .select();
 
       if (error) {

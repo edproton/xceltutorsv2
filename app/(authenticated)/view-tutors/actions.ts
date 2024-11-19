@@ -1,120 +1,63 @@
 "use server";
-
-import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
-import { PageResponse, TutorWithPrices } from "./types";
+import { PageResponse, PriceRange, TutorQueryResult } from "./types";
+import { profiles, tutors, tutorsServices } from "@/supabase/migrations/schema";
+import { db } from "@/lib/database";
 
-async function getTutorsPaginated(
-  supabase: DbSupabaseClient,
+export async function getTutorsPaginated(
   pageNumber: number
-): Promise<PageResponse<TutorWithPrices>> {
-  const perPage = 5; // Fixed page size
+): Promise<PageResponse<TutorQueryResult>> {
+  const perPage = 5;
   const offset = (pageNumber - 1) * perPage;
 
-  // Step 1: Fetch paginated data with related profiles
-  const tutorsQuery = await supabase
-    .from("tutors")
-    .select(
-      `
-      id,
-      metadata,
-      profiles (name, avatar),
-      tutors_services (price)
-    `
-    )
-    .order("created_at", { ascending: false })
-    .range(offset, offset + perPage - 1)
-    .returns<
-      {
-        id: string;
-        metadata: {
-          bio: {
-            full: string;
-            short: string;
-            session: string;
-          };
-          completed_lessons: number;
-          reviews: number;
-          tags: string[];
-          trusted_by_schools: boolean;
-          degree: string;
-          grades: {
-            grade: string;
-            level: string;
-            subject: string;
-          }[];
-          university: string;
-        };
-        profiles: {
-          name: string;
-          avatar: string;
-        };
-        tutors_services: {
-          price: number;
-        }[];
-      }[]
-    >();
+  const tutorRecords = await db
+    .select({
+      id: tutors.id,
+      name: sql<string>`${profiles.name}`,
+      avatarUrl: sql<string>`${profiles.avatarUrl}`,
+      priceRange: sql<PriceRange>`
+      CASE 
+        WHEN MIN(${tutorsServices.price}) != MAX(${tutorsServices.price}) 
+        THEN jsonb_build_object('min', MIN(${tutorsServices.price}), 'max', MAX(${tutorsServices.price}))
+        ELSE jsonb_build_object('value', MIN(${tutorsServices.price}))
+      END
+    `.as("priceRange"),
+      bioShort: sql<string>`metadata->'bio'->>'short'`.as("bioShort"),
+      tags: sql<string[]>`metadata->'tags'`.as("tags"),
+      degree: sql<string>`metadata->>'degree'`.as("degree"),
+      university: sql<string>`metadata->>'university'`.as("university"),
+      completedLessons: sql<number>`(metadata->>'completed_lessons')::int`.as(
+        "completedLessons"
+      ),
+      reviews: sql<number>`(metadata->>'reviews')::int`.as("reviews"),
+    })
+    .from(tutors)
+    .leftJoin(profiles, eq(tutors.profileId, profiles.id))
+    .leftJoin(tutorsServices, eq(tutors.id, tutorsServices.tutorId))
+    .limit(perPage)
+    .offset(offset)
+    .groupBy(tutors.id, profiles.name, profiles.avatarUrl, tutors.metadata);
 
-  if (tutorsQuery.error) {
-    throw new Error(`Failed to fetch data: ${tutorsQuery.error.message}`);
-  }
+  const totalItems = await db
+    .select({ count: sql`count(${tutors.id})` })
+    .from(tutors)
+    .then((result) => Number(result[0]?.count) || 0);
 
-  // Step 2: Get total count of items
-  const { count, error: countError } = await supabase
-    .from("tutors")
-    .select("id", { count: "exact", head: true });
-
-  if (countError) {
-    throw new Error(`Failed to fetch count: ${countError.message}`);
-  }
-
-  // Step 3: Calculate pagination metadata
-  const totalItems = count || 0;
   const totalPages = Math.ceil(totalItems / perPage);
 
-  // Type-safe data mapping
   return {
     page: pageNumber,
     perPage: perPage,
     totalItems: totalItems,
     totalPages: totalPages,
-    items: tutorsQuery.data.map((item) => {
-      return {
-        id: item.id,
-        name: item.profiles?.name ?? "Unknown Tutor",
-        avatar: item.profiles?.avatar ?? "",
-        prices: item.tutors_services.map((service) => service.price),
-        metadata: {
-          bio: {
-            full: item.metadata?.bio?.full ?? "",
-            short: item.metadata?.bio?.short ?? "",
-            session: item.metadata?.bio?.session ?? "",
-          },
-          completedLessons: item.metadata?.completed_lessons ?? 0,
-          reviews: item.metadata?.reviews ?? 0,
-          tags: item.metadata?.tags ?? [],
-          trustedBySchools: item.metadata?.trusted_by_schools ?? false,
-          degree: item.metadata?.degree ?? "",
-          grades:
-            item.metadata?.grades?.map((grade) => ({
-              grade: grade.grade,
-              level: grade.level,
-              subject: grade.subject,
-            })) ?? [],
-          university: item.metadata?.university ?? "",
-        },
-      };
-    }),
+    items: tutorRecords,
   };
 }
 
-export async function getTutorsPaginatedCached(
-  pageNumber: number
-): Promise<PageResponse<TutorWithPrices>> {
-  const supabase = await createClient();
-
+export async function getTutorsPaginatedCached(pageNumber: number) {
   return unstable_cache(
-    () => getTutorsPaginated(supabase, pageNumber),
+    () => getTutorsPaginated(pageNumber),
     [`tutors-paginated-${pageNumber}`],
     {
       revalidate: 60 * 60 * 24 * 7, // 1 week

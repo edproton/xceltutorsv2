@@ -5,12 +5,12 @@ import { Star } from "lucide-react";
 import ImprovedFilterSection from "./components/filters-section";
 import Pagination from "./components/pagination";
 import TutorCard from "./components/tutor-card";
-import { PageResponse, TutorWithPrices } from "./types";
+import { PageResponse, TutorQueryResult } from "./types";
 
 export default function ViewTutorsPage({
   tutors,
 }: {
-  tutors: PageResponse<TutorWithPrices>;
+  tutors: PageResponse<TutorQueryResult>;
 }) {
   return (
     <div className="min-h-screen bg-background">

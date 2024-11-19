@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { TutorWithPrices } from "../types";
+import { TutorQueryResult } from "../types";
 
 interface TutorCardProps {
-  tutor: TutorWithPrices;
+  tutor: TutorQueryResult;
 }
 
 const tagColorMap: Record<string, string> = {
@@ -19,16 +19,14 @@ export default function Component({
   tutor: {
     id,
     name,
-    avatar,
-    metadata: {
-      bio: { short },
-      completedLessons,
-      reviews,
-      tags,
-      degree,
-      university,
-    },
-    prices,
+    avatarUrl,
+    bioShort,
+    completedLessons,
+    degree,
+    priceRange,
+    tags,
+    university,
+    reviews,
   },
 }: TutorCardProps) {
   return (
@@ -39,7 +37,7 @@ export default function Component({
             <div className="relative w-1/4 min-w-[100px] max-w-[120px]">
               <Avatar className="h-full w-full rounded-none">
                 <AvatarImage
-                  src={avatar}
+                  src={avatarUrl}
                   alt={`Tutor ${name}`}
                   className="object-cover"
                 />
@@ -75,7 +73,7 @@ export default function Component({
                   </div>
                 )}
                 <p className="text-sm leading-snug text-muted-foreground line-clamp-2">
-                  {short}
+                  {bioShort}
                 </p>
               </div>
               {(reviews > 0 || completedLessons > 0) && (
@@ -103,10 +101,10 @@ export default function Component({
         </CardContent>
         {/* Price badge */}
         <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 rounded-bl-lg font-semibold">
-          {prices.length > 0 &&
-            (Math.min(...prices) === Math.max(...prices)
-              ? `£${Math.min(...prices)}/hr`
-              : `£${Math.min(...prices)} - £${Math.max(...prices)}/hr`)}
+          {priceRange &&
+            ("value" in priceRange
+              ? `£${priceRange.value}/hr`
+              : `£${priceRange.min} - £${priceRange.max}/hr`)}
         </div>
       </Card>
     </Link>
