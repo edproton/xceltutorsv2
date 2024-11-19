@@ -146,7 +146,7 @@ export const submitTutoringRequest = actionClient
 
     const message = {
       conversationId: conversationData.id,
-      fromProfileId: user.id,
+      senderProfileId: user.id,
     };
 
     const { error: cardMessageError } = await sendMessage(supabase, {
@@ -184,19 +184,19 @@ async function sendMessage(
   supabase: DbSupabaseClient,
   {
     conversationId,
-    fromProfileId,
+    senderProfileId,
     content,
     visibleTo,
   }: {
     conversationId: number;
-    fromProfileId: string;
+    senderProfileId: string;
     content: MessageContent[];
     visibleTo: VisibleTo;
   }
 ) {
   const { error } = await supabase.from("messages").insert({
     conversation_id: conversationId,
-    sender_profile_id: fromProfileId,
+    sender_profile_id: senderProfileId,
     content: [...content],
     visible_to: visibleTo,
     is_read: false,
