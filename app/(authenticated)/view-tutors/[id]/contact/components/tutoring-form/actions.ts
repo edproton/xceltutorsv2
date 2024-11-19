@@ -196,7 +196,7 @@ async function sendMessage(
 ) {
   const { error } = await supabase.from("messages").insert({
     conversation_id: conversationId,
-    from_profile_id: fromProfileId,
+    sender_profile_id: fromProfileId,
     content: [...content],
     visible_to: visibleTo,
     is_read: false,

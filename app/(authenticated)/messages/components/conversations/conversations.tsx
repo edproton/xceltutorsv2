@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus } from "lucide-react";
 import { Profile } from "../../types";
 import ConversationItem from "./conversation-item";
 import { MessageContent } from "../../types";
@@ -25,14 +23,12 @@ type ConversationsProps = {
   currentUserId: string;
   selectedConversationId: number | null;
   onSelectConversation: (id: number) => void;
-  onNewChat: () => void;
 };
 
 export default function Conversations({
   currentUserId,
   selectedConversationId,
   onSelectConversation,
-  onNewChat,
 }: ConversationsProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
@@ -56,7 +52,7 @@ export default function Conversations({
         ),
         messages!inner (
           id,
-          from_profile_id,
+          sender_profile_id,
           is_read,
           content
         )
@@ -78,13 +74,13 @@ export default function Conversations({
 
         // Calculate unread count
         const unreadCount = conv.messages.filter(
-          (msg: { is_read: boolean; from_profile_id: string }) =>
+          (msg: { is_read: boolean; sender_profile_id: string }) =>
             !msg.is_read &&
-            msg.from_profile_id !== currentUserId &&
+            msg.sender_profile_id !== currentUserId &&
             ((conv.from_profile_id === currentUserId &&
-              msg.from_profile_id === conv.to_profile_id) ||
+              msg.sender_profile_id === conv.to_profile_id) ||
               (conv.to_profile_id === currentUserId &&
-                msg.from_profile_id === conv.from_profile_id))
+                msg.sender_profile_id === conv.from_profile_id))
         ).length;
 
         // Determine the last message preview
@@ -145,10 +141,6 @@ export default function Conversations({
     <div className="w-60 border-r bg-muted/50 flex flex-col">
       <div className="border-b h-[60px] px-4 flex justify-between items-center">
         <h2 className="font-semibold">Conversations</h2>
-        <Button variant="ghost" size="icon" onClick={onNewChat}>
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">New chat</span>
-        </Button>
       </div>
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-2">

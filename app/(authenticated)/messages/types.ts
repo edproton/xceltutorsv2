@@ -57,7 +57,7 @@ export type VisibleTo = "from" | "to" | "both";
 export interface Message {
   id: number;
   conversation_id: number;
-  from_profile_id: string;
+  sender_profile_id: string;
   content: MessageContent[];
   created_at: string;
   is_read: boolean;

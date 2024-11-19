@@ -67,7 +67,7 @@ function groupMessages(
   return messages.reduce((groups: GroupedMessage[], message) => {
     const date = format(new Date(message.created_at), "MMMM d, yyyy");
     const sender =
-      message.from_profile_id === currentUserId ? "You" : otherPersonName;
+      message.sender_profile_id === currentUserId ? "You" : otherPersonName;
     const lastGroup = groups[groups.length - 1];
 
     if (date !== lastDate) {

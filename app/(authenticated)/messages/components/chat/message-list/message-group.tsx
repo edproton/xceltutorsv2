@@ -24,9 +24,9 @@ export default function MessageGroup({
       )}
       {group.messages.map((message, messageIndex) => (
         <MessageBubble
-          key={`${message.id}-${message.from_profile_id}-${message.created_at}`}
+          key={`${message.id}-${message.sender_profile_id}-${message.created_at}`}
           message={message}
-          isCurrentUser={message.from_profile_id === currentUserId}
+          isCurrentUser={message.sender_profile_id === currentUserId}
           isFirstInGroup={messageIndex === 0}
           senderName={group.sender}
         />
