@@ -1,5 +1,3 @@
-import { DateTime } from "luxon";
-
 export type BookingStatus =
   | "PendingDate"
   | "WaitingPayment"

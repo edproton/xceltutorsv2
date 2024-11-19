@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import * as React from "react";
 import { Booking } from "../types";
+import { DateTime } from "luxon";
 
 interface CancelDialogProps {
   open: boolean;
@@ -51,7 +52,9 @@ export default function CancelDialog({
             </p>
             <p className="text-sm text-muted-foreground">{booking.subject}</p>
             <p className="text-sm text-muted-foreground">
-              {booking.dateTime.toFormat("EEEE, MMMM d, yyyy 'at' h:mm a")}
+              {DateTime.fromISO(booking.dateTime).toFormat(
+                "EEEE, MMMM d, yyyy 'at' h:mm a"
+              )}
             </p>
           </CardContent>
         </Card>

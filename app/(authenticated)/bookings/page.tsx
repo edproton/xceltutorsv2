@@ -1,7 +1,6 @@
-import { Booking, BookingStatus, BookingType } from "./types";
+import { Booking } from "./types";
 import Bookings from "./bookings";
 import { DateTime } from "luxon";
-import { createClient } from "@/lib/supabase/server";
 
 const mockBookings: Booking[] = [
   {
@@ -67,12 +66,6 @@ const mockBookings: Booking[] = [
 ];
 
 export default async function BookingsPage() {
-  const supabase = await createClient();
-
-  // const { data, error } = await supabase.from("bookings").select("*");
-
-  // console.log(data, error);
-
   return (
     <div className="container mx-auto px-4">
       <Bookings bookings={mockBookings} />
