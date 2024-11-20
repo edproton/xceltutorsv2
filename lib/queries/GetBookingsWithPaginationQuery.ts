@@ -25,6 +25,9 @@ type BookingDBResult = {
   subjectName: string;
 };
 
+export type GetBookingsWithPaginationQueryResponseItem = Booking;
+export type GetBookingsWithPaginationQueryResponse = PageResponse<Booking>;
+
 export class GetBookingsWithPaginationQuery {
   private static convertToLondonTime(utcTime: string): string {
     return DateTime.fromISO(utcTime, { zone: "utc" })
@@ -61,7 +64,7 @@ export class GetBookingsWithPaginationQuery {
   static async execute(
     pageNumber: number,
     pageSize: number = 5
-  ): Promise<Response<PageResponse<Booking>>> {
+  ): Promise<Response<GetBookingsWithPaginationQueryResponse>> {
     try {
       const offset = (pageNumber - 1) * pageSize;
 

@@ -24,6 +24,8 @@ type BookingDBResult = {
   subjectName: string;
 };
 
+export type GetBookingByIdQueryResponse = Booking;
+
 export class GetBookingByIdQuery {
   private static convertToLondonTime(utcTime: string): string {
     return DateTime.fromISO(utcTime, { zone: "utc" })
@@ -57,7 +59,9 @@ export class GetBookingByIdQuery {
     };
   }
 
-  static async execute(bookingId: number): Promise<ResponseWrapper<Booking>> {
+  static async execute(
+    bookingId: number
+  ): Promise<ResponseWrapper<GetBookingByIdQueryResponse>> {
     try {
       const booking = await db
         .selectFrom("bookings")

@@ -1,13 +1,15 @@
 import { createClient } from "../supabase/server";
 import { ResponseWrapper } from "../types";
-type AuthenticatedResponse = {
+type GetAuthenticatedUserQueryResponse = {
   user: {
     id: string;
   };
 };
 
 export class GetAuthenticatedUserQuery {
-  static async execute(): Promise<ResponseWrapper<AuthenticatedResponse>> {
+  static async execute(): Promise<
+    ResponseWrapper<GetAuthenticatedUserQueryResponse>
+  > {
     try {
       const supabase = await createClient();
 
