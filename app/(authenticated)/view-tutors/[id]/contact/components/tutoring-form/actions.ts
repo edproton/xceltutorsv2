@@ -1,8 +1,7 @@
 "use server";
 
-import { actionClient } from "@/lib/safe-action";
+import { actionClient, ResultError } from "@/lib/safe-action";
 import { tutoringFormSchema } from "./schema";
-import { redirect } from "next/navigation";
 import { GetAuthenticatedUserQuery } from "@/lib/queries/GetUserFromSupabase";
 import { BookingDemoRequestCommand } from "@/lib/commands/BookingDemoRequestCommand ";
 
@@ -28,8 +27,6 @@ export const submitTutoringRequest = actionClient
     );
 
     if (error) {
-      throw new Error(error);
+      throw new ResultError(error);
     }
-
-    redirect(`/view-tutors/${parsedInput.tutorId}/contact/confirmation`);
   });

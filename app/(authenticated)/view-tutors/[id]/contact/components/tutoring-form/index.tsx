@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { toast } from "@/hooks/use-toast";
 import { tutoringFormSchema } from "./schema";
 import FormHeader from "./form-header";
 import SubjectLevelSelect from "./subject-level-select";
@@ -15,10 +14,12 @@ import InfoCard from "./info-card";
 import FAQSection from "./faq-section";
 import { submitTutoringRequest } from "./actions";
 import { TutorInfo } from "../../types";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
   const [subjectOpen, setSubjectOpen] = useState(false);
-
+  const router = useRouter();
   const {
     form: {
       control,
@@ -43,6 +44,15 @@ export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
         },
       },
       actionProps: {
+        onSuccess: () => {
+          toast({
+            title: `🎉 Booking request sent to ${tutor.name}`,
+            description: `We've notified ${tutor.name} of your interest. Check your messages for their response.`,
+            variant: "success",
+          });
+
+          router.replace(`/messages`);
+        },
         onError: ({ error }) => {
           toast({
             title: "Error",
