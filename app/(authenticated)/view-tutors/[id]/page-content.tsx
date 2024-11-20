@@ -64,15 +64,7 @@ const weekdayIndexMap = {
 };
 
 export default function ViewTutorsByIdPageContent({
-  tutor: {
-    id,
-    name,
-    avatar,
-    metadata,
-    availabilities,
-    services,
-    hasAlreadyBeenContacted,
-  },
+  tutor: { id, name, avatar, metadata, availabilities, services, uiHelper },
 }: {
   tutor: TutorWithAvailabilityAndServices;
 }) {
@@ -166,7 +158,7 @@ export default function ViewTutorsByIdPageContent({
 
   const Sidebar = () => (
     <div className="space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto pr-4 hide-scrollbar">
-      {!hasAlreadyBeenContacted && (
+      {!uiHelper.hasAlreadyHadDemoBooking && (
         <Card className="overflow-hidden">
           <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
             <div className="text-center space-y-2">
@@ -285,12 +277,9 @@ export default function ViewTutorsByIdPageContent({
                   </div>
                 </div>
                 <Badge className="text-lg font-semibold px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200">
-                  {Math.min(...services.map((s) => s.price)) ===
-                  Math.max(...services.map((s) => s.price))
-                    ? `£${Math.min(...services.map((s) => s.price))}/hr`
-                    : `£${Math.min(
-                        ...services.map((s) => s.price)
-                      )} - £${Math.max(...services.map((s) => s.price))}/hr`}
+                  {uiHelper.multiplePrices
+                    ? `£${uiHelper.multiplePrices.minPrice} - £${uiHelper.multiplePrices.minPrice}/hr`
+                    : `£${services[0].price}/hr`}
                 </Badge>
               </div>
             </div>

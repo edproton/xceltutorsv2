@@ -1,39 +1,47 @@
-export interface TutorAvailability {
+interface Bio {
+  full: string;
+  short: string;
+  session: string;
+}
+
+export interface Metadata {
+  bio: Bio;
+  tags: string[];
+  degree: string;
+  grades: { grade: string; level: string; subject: string }[];
+  reviews: number;
+  university: string;
+  completedLessons: number;
+  trustedBySchools: boolean;
+}
+
+export interface Service {
+  subject: string;
+  level: string;
+  price: string;
+}
+
+export interface Availability {
   weekday: string;
   morning: boolean;
   afternoon: boolean;
   evening: boolean;
 }
 
-export interface TutorServices {
-  subject: string;
-  level: string;
-  price: number;
+interface UiHelper {
+  hasAlreadyHadDemoBooking: boolean;
+  multiplePrices?: {
+    minPrice: number;
+    maxPrice: number;
+  };
 }
 
 export interface TutorWithAvailabilityAndServices {
   id: string;
   name: string;
   avatar: string;
-  hasAlreadyBeenContacted: boolean;
-  metadata: {
-    bio: {
-      full: string;
-      short: string;
-      session: string;
-    };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    trustedBySchools: boolean;
-    degree: string;
-    grades: Array<{
-      grade: string;
-      level: string;
-      subject: string;
-    }>;
-    university: string;
-  };
-  services: TutorServices[];
-  availabilities: TutorAvailability[];
+  metadata: Metadata;
+  services: Service[];
+  availabilities: Availability[];
+  uiHelper: UiHelper;
 }
