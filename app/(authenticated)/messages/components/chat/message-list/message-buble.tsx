@@ -11,9 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, CheckCheck, Eye, EyeOff, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { CardColor, Message, MessageContent } from "../../../types";
 import { CallbackDialog } from "./callback-dialog";
 import DOMPurify from "dompurify";
+import { CardColor, MessageContent, Message } from "@/lib/database/types";
 
 interface MessageBubbleProps {
   message: Message;

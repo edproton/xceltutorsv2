@@ -2,15 +2,16 @@
 
 import { actionClient } from "@/lib/safe-action";
 import { tutoringFormSchema } from "./schema";
-import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { DateTime } from "luxon";
+import { db } from "@/lib/database";
 import {
   CardMessage,
   MessageContent,
   TextMessage,
   VisibleTo,
-} from "@/app/(authenticated)/messages/types";
-import { redirect } from "next/navigation";
-import { DateTime } from "luxon";
+} from "@/lib/database/types";
 
 export const submitTutoringRequest = actionClient
   .schema(tutoringFormSchema)
@@ -24,23 +25,26 @@ export const submitTutoringRequest = actionClient
     if (userError || !user) throw new Error("Failed to get user data");
 
     // Get the user's profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, name")
-      .eq("id", user.id)
-      .single();
+    const userProfile = await db
+      .selectFrom("profiles")
+      .select(["id", "name"])
+      .where("id", "=", user.id)
+      .executeTakeFirst();
 
-    if (profileError) throw new Error("Failed to get profile data");
+    if (!userProfile) {
+      throw new Error("User not found");
+    }
 
     // Get the tutor's profile
-    const { data: tutorData, error: tutorError } = await supabase
-      .from("tutors")
-      .select("profile_id")
-      .eq("id", parsedInput.tutorId)
-      .single();
+    const tutorProfile = await db
+      .selectFrom("tutors")
+      .select(["profileId"])
+      .where("id", "=", parsedInput.tutorId)
+      .executeTakeFirst();
 
-    if (tutorError)
-      throw new Error(`Tutor with id ${parsedInput.tutorId} does not exist`);
+    if (!tutorProfile) {
+      throw new Error("Tutor not found");
+    }
 
     const meetingDate = DateTime.fromJSDate(parsedInput.meetingDate, {
       zone: "Europe/London",
@@ -53,23 +57,19 @@ export const submitTutoringRequest = actionClient
     const startTimeUTC = meetingStartTime.toUTC();
     const endTimeUTC = meetingEndTime.toUTC();
 
-    const { data: existingBooking, error: existingBookingError } =
-      await supabase
-        .from("bookings")
-        .select("id")
-        .or(
-          `and(start_time.lte.${endTimeUTC.toISO()},end_time.gte.${startTimeUTC.toISO()})`
-        )
-        .eq("tutor_id", parsedInput.tutorId)
-        .maybeSingle();
-
-    if (existingBookingError) {
-      console.error("Error checking existing bookings:", existingBookingError);
-      throw new Error("Could not check for existing bookings.");
-    }
+    const existingBooking = await db
+      .selectFrom("bookings")
+      .select(["id"])
+      .where("tutorId", "=", parsedInput.tutorId)
+      .where((eb) =>
+        eb.and([
+          eb("startTime", "<", endTimeUTC.toJSDate()),
+          eb("endTime", ">", startTimeUTC.toJSDate()),
+        ])
+      )
+      .executeTakeFirst();
 
     if (existingBooking) {
-      console.log("Time slot is already booked:", existingBooking.id);
       throw new Error(
         "This time slot is already booked. Please select another time."
       );
@@ -79,7 +79,7 @@ export const submitTutoringRequest = actionClient
       .from("bookings")
       .insert({
         tutor_id: parsedInput.tutorId,
-        created_by_profile_id: profile.id,
+        created_by_profile_id: userProfile.id,
         type: "Free Meeting",
         start_time: startTimeUTC.toISO()!,
         end_time: endTimeUTC.toISO()!,
@@ -96,28 +96,25 @@ export const submitTutoringRequest = actionClient
       throw new Error("Failed to create booking");
     }
 
-    const { data: conversationData, error: conversationError } = await supabase
-      .from("conversations")
-      .insert({
-        from_profile_id: profile.id,
-        to_profile_id: tutorData.profile_id,
+    const existingConversation = await db
+      .selectFrom("conversations")
+      .where("fromProfileId", "=", userProfile.id)
+      .where("toProfileId", "=", tutorProfile.profileId)
+      .executeTakeFirst();
+
+    if (existingConversation) {
+      throw new Error(
+        "You already have a estabalished conversation with this user"
+      );
+    }
+
+    const newConversation = await db
+      .insertInto("conversations")
+      .values({
+        fromProfileId: userProfile.id,
+        toProfileId: tutorProfile.profileId,
       })
-      .select("id")
-      .single();
-
-    if (conversationError) {
-      if (conversationError.code === "23505") {
-        throw new Error("A conversation with this tutor already exists");
-      } else {
-        console.error("Conversation insert error:", conversationError);
-        throw new Error("Failed to create conversation");
-      }
-    }
-
-    if (!conversationData) {
-      console.error("Conversation data is null");
-      throw new Error("Failed to retrieve inserted conversation data");
-    }
+      .execute();
 
     const meetingStartDateFormatted = meetingStartTime.toLocaleString(
       DateTime.DATE_MED
@@ -126,7 +123,7 @@ export const submitTutoringRequest = actionClient
     const meetingEndTimeFormatted = meetingEndTime.toFormat("h:mm a");
 
     const cardMessageContent: CardMessage = {
-      title: `📅 Free Tutoring Request from ${profile.name}`,
+      title: `📅 Free Tutoring Request from ${userProfile.name}`,
       description: `<b>Date:</b> ${meetingStartDateFormatted}\n<b>Time:</b> ${meetingStartTimeFormatted} - ${meetingEndTimeFormatted}`,
       type: "card",
       actions: [
@@ -144,13 +141,13 @@ export const submitTutoringRequest = actionClient
     };
 
     const message = {
-      conversationId: conversationData.id,
+      conversationId: Number(newConversation[0].insertId),
       senderProfileId: user.id,
     };
 
-    const { error: cardMessageError } = await sendMessage(supabase, {
+    const { error: cardMessageError } = await sendMessage({
       ...message,
-      content: [cardMessageContent],
+      content: cardMessageContent,
       visibleTo: "to",
     });
 
@@ -164,9 +161,9 @@ export const submitTutoringRequest = actionClient
       type: "text",
     };
 
-    const { error: textMessageError } = await sendMessage(supabase, {
+    const { error: textMessageError } = await sendMessage({
       ...message,
-      content: [textMessageContent],
+      content: textMessageContent,
       visibleTo: "both",
     });
 
@@ -178,27 +175,29 @@ export const submitTutoringRequest = actionClient
     redirect(`/view-tutors/${parsedInput.tutorId}/contact/confirmation`);
   });
 
-async function sendMessage(
-  supabase: DbSupabaseClient,
-  {
-    conversationId,
-    senderProfileId,
-    content,
-    visibleTo,
-  }: {
-    conversationId: number;
-    senderProfileId: string;
-    content: MessageContent[];
-    visibleTo: VisibleTo;
-  }
-) {
-  const { error } = await supabase.from("messages").insert({
-    conversation_id: conversationId,
-    sender_profile_id: senderProfileId,
-    content: [...content],
-    visible_to: visibleTo,
-    is_read: false,
-  });
+async function sendMessage({
+  conversationId,
+  senderProfileId,
+  content,
+  visibleTo,
+}: {
+  conversationId: number;
+  senderProfileId: string;
+  content: MessageContent;
+  visibleTo: VisibleTo;
+}) {
+  const [result] = await db
+    .insertInto("messages")
+    .values({
+      conversationId,
+      senderProfileId,
+      content: [content],
+      visibleTo,
+      isRead: false,
+    })
+    .execute();
+
+  const error = !result ? new Error("Failed to insert message") : null;
 
   if (error) {
     console.error("Message insert error:", error.message);

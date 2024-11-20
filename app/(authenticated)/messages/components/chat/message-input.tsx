@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { TextMessage } from "../../types";
+import { TextMessage } from "@/lib/database/types";
 
 type MessageInputProps = {
   onSendMessage: (content: TextMessage[]) => void;

@@ -3,6 +3,7 @@
  * Please do not edit it manually.
  */
 
+import { MessageContent } from "@/app/(authenticated)/messages/types";
 import type { ColumnType } from "kysely";
 
 export type AuthAalLevel = "aal1" | "aal2" | "aal3";
@@ -360,8 +361,58 @@ export interface Levels {
   subjectId: number;
 }
 
+export interface TextMessage {
+  type: "text";
+  text: string;
+}
+
+export type CardColor =
+  | "red"
+  | "blue"
+  | "green"
+  | "yellow"
+  | "purple"
+  | "gray"
+  | "pink"
+  | "teal"
+  | "cyan"
+  | "lime"
+  | "amber"
+  | "orange"
+  | "default";
+
+export interface CardMessage {
+  type: "card";
+  title: string;
+  description: string;
+  imageUrl?: string;
+  actions?: {
+    color?: CardColor;
+    label: string;
+    url?: string;
+    callback?: {
+      name: string;
+      params: Record<string, string>;
+    };
+  }[];
+}
+
+export type MessageContent = TextMessage | CardMessage;
+
+export type VisibleTo = "from" | "to" | "both";
+
+export interface Message {
+  id: number;
+  conversation_id: number;
+  sender_profile_id: string;
+  content: MessageContent[];
+  created_at: string;
+  is_read: boolean;
+  visible_to: VisibleTo;
+}
+
 export interface Messages {
-  content: Generated<Json>;
+  content: MessageContent[];
   conversationId: number | null;
   createdAt: Generated<Timestamp | null>;
   id: Generated<number>;

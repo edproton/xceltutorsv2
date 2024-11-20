@@ -1,5 +1,5 @@
+import { Message } from "@/lib/database/types";
 import { useEffect, useRef, useCallback } from "react";
-import { Message } from "../types";
 
 export default function useMessageObserver(
   messages: Message[],

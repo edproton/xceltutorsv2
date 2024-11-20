@@ -4,7 +4,7 @@ import MessageGroup from "./message-group";
 import useScrollManagement from "../../../hooks/use-scroll-management";
 import useMessageObserver from "../../../hooks/use-message-observer";
 import ScrollButton from "../scroll-button";
-import { Message } from "../../../types";
+import { Message } from "@/lib/database/types";
 
 type MessageListProps = {
   messages: Message[];

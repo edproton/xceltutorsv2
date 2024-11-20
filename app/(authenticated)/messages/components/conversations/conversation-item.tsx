@@ -10,12 +10,12 @@ import {
 } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { Conversation } from "./conversations";
-import { MessageContent } from "../../types";
 import {
   ArrowDownLeft,
   ArrowUpRight,
   ArrowUpDownIcon as ArrowsUpDown,
 } from "lucide-react";
+import { MessageContent } from "@/lib/database/types";
 
 type ConversationItemProps = {
   conversation: Conversation;
