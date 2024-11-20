@@ -13,9 +13,21 @@ export type AuthFactorStatus = "unverified" | "verified";
 
 export type AuthFactorType = "phone" | "totp" | "webauthn";
 
-export type AuthOneTimeTokenType = "confirmation_token" | "email_change_token_current" | "email_change_token_new" | "phone_change_token" | "reauthentication_token" | "recovery_token";
+export type AuthOneTimeTokenType =
+  | "confirmation_token"
+  | "email_change_token_current"
+  | "email_change_token_new"
+  | "phone_change_token"
+  | "reauthentication_token"
+  | "recovery_token";
 
-export type BookingStatus = "Canceled" | "Completed" | "Confirmed" | "PaymentFailed" | "PendingDate" | "WaitingPayment";
+export type BookingStatus =
+  | "Canceled"
+  | "Completed"
+  | "Confirmed"
+  | "PaymentFailed"
+  | "PendingDate"
+  | "WaitingPayment";
 
 export type BookingType = "Free Meeting" | "Group Lesson" | "Lesson";
 
@@ -23,7 +35,11 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
 
 export type Json = JsonValue;
 
@@ -41,7 +57,18 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type PgsodiumKeyStatus = "default" | "expired" | "invalid" | "valid";
 
-export type PgsodiumKeyType = "aead-det" | "aead-ietf" | "auth" | "generichash" | "hmacsha256" | "hmacsha512" | "kdf" | "secretbox" | "secretstream" | "shorthash" | "stream_xchacha20";
+export type PgsodiumKeyType =
+  | "aead-det"
+  | "aead-ietf"
+  | "auth"
+  | "generichash"
+  | "hmacsha256"
+  | "hmacsha512"
+  | "kdf"
+  | "secretbox"
+  | "secretstream"
+  | "shorthash"
+  | "stream_xchacha20";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
@@ -257,7 +284,7 @@ export interface Bookings {
   createdByProfileId: string;
   endTime: Timestamp;
   id: Generated<number>;
-  metadata: Json | null;
+  metadata: Metadata;
   paymentIntentId: string | null;
   paymentStatus: string | null;
   price: Numeric | null;
@@ -533,10 +560,27 @@ export interface SupabaseMigrationsSeedFiles {
   path: string;
 }
 
+export interface TutorBio {
+  full: string;
+  short: string;
+  session: string;
+}
+
+export interface TutorMetadata {
+  bio: TutorBio;
+  tags: string[];
+  degree: string;
+  grades: { grade: string; level: string; subject: string }[];
+  reviews: number;
+  university: string;
+  completedLessons: number;
+  trustedBySchools: boolean;
+}
+
 export interface Tutors {
   createdAt: Generated<Timestamp | null>;
   id: Generated<string>;
-  metadata: Json;
+  metadata: TutorMetadata;
   profileId: string;
 }
 

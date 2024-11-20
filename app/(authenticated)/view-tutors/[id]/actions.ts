@@ -3,18 +3,17 @@
 import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
 import {
   Availability,
-  Metadata,
   Service,
   TutorWithAvailabilityAndServices,
 } from "./types";
 import { db } from "@/lib/database";
-import { JsonValue } from "@/lib/database/types";
+import { TutorMetadata } from "@/lib/database/types";
 import { NotNull } from "kysely";
 
 type TutorRow = {
   id: string;
   avatar: string;
-  metadata: JsonValue;
+  metadata: TutorMetadata;
   price: string;
   afternoon: boolean;
   evening: boolean;
@@ -35,7 +34,7 @@ function mapTutorData(data: TutorRow[]): TutorWithAvailabilityAndServices {
     id: data[0].id,
     name: data[0].tutorName,
     avatar: data[0].avatar,
-    metadata: data[0].metadata as unknown as Metadata,
+    metadata: data[0].metadata,
     services: [],
     availabilities: [],
     uiHelper: {

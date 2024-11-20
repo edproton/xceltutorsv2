@@ -1,120 +1,77 @@
 "use server";
 
-import { createClient, DbSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 import { PageResponse, TutorWithPrices } from "./types";
+import { db } from "@/lib/database";
+import { NotNull, sql } from "kysely";
 
-async function getTutorsPaginated(
-  supabase: DbSupabaseClient,
+export async function getTutorsPaginated(
   pageNumber: number
 ): Promise<PageResponse<TutorWithPrices>> {
-  const perPage = 5; // Fixed page size
-  const offset = (pageNumber - 1) * perPage;
+  const perPage = 5;
+  const _pageNumber = Number.isNaN(Number(pageNumber))
+    ? 1
+    : Math.max(1, Number(pageNumber));
+  const offset = (_pageNumber - 1) * perPage;
 
-  // Step 1: Fetch paginated data with related profiles
-  const tutorsQuery = await supabase
-    .from("tutors")
-    .select(
-      `
-      id,
-      metadata,
-      profiles (name, avatar),
-      tutors_services (price)
-    `
-    )
-    .order("created_at", { ascending: false })
-    .range(offset, offset + perPage - 1)
-    .returns<
-      {
-        id: string;
-        metadata: {
-          bio: {
-            full: string;
-            short: string;
-            session: string;
-          };
-          completed_lessons: number;
-          reviews: number;
-          tags: string[];
-          trusted_by_schools: boolean;
-          degree: string;
-          grades: {
-            grade: string;
-            level: string;
-            subject: string;
-          }[];
-          university: string;
-        };
-        profiles: {
-          name: string;
-          avatar: string;
-        };
-        tutors_services: {
-          price: number;
-        }[];
-      }[]
-    >();
+  const tutors = await db
+    .selectFrom("tutors")
+    .innerJoin("profiles", "profiles.id", "tutors.profileId")
+    .leftJoin("tutorsServices", "tutorsServices.tutorId", "tutors.id")
+    .select([
+      "tutors.id",
+      "tutors.metadata",
+      "profiles.name",
+      "profiles.avatar",
+      sql`ARRAY_AGG(tutors_services.price)`.as("prices"),
+    ])
+    .groupBy([
+      "tutors.id",
+      "profiles.name",
+      "profiles.avatar",
+      "tutors.metadata",
+    ])
+    .$narrowType<{
+      avatar: NotNull;
+      prices: number[];
+    }>()
+    .orderBy("tutors.createdAt", "desc")
+    .where("avatar", "is not", null)
 
-  if (tutorsQuery.error) {
-    throw new Error(`Failed to fetch data: ${tutorsQuery.error.message}`);
+    .offset(offset)
+    .limit(perPage)
+    .execute();
+
+  console.log(tutors);
+
+  const totalItems = await db
+    .selectFrom("tutors")
+    .select(db.fn.count("tutors.id").as("count"))
+    .executeTakeFirstOrThrow();
+
+  const totalItemsCount = parseInt(String(totalItems.count), 10); // Safely parse as an integer
+
+  if (isNaN(totalItemsCount)) {
+    throw new Error("Failed to fetch total items count.");
   }
 
-  // Step 2: Get total count of items
-  const { count, error: countError } = await supabase
-    .from("tutors")
-    .select("id", { count: "exact", head: true });
-
-  if (countError) {
-    throw new Error(`Failed to fetch count: ${countError.message}`);
-  }
-
-  // Step 3: Calculate pagination metadata
-  const totalItems = count || 0;
-  const totalPages = Math.ceil(totalItems / perPage);
+  const totalPages = Math.ceil(totalItemsCount / perPage);
 
   // Type-safe data mapping
   return {
     page: pageNumber,
     perPage: perPage,
-    totalItems: totalItems,
+    totalItems: Number(totalItems.count),
     totalPages: totalPages,
-    items: tutorsQuery.data.map((item) => {
-      return {
-        id: item.id,
-        name: item.profiles?.name ?? "Unknown Tutor",
-        avatar: item.profiles?.avatar ?? "",
-        prices: item.tutors_services.map((service) => service.price),
-        metadata: {
-          bio: {
-            full: item.metadata?.bio?.full ?? "",
-            short: item.metadata?.bio?.short ?? "",
-            session: item.metadata?.bio?.session ?? "",
-          },
-          completedLessons: item.metadata?.completed_lessons ?? 0,
-          reviews: item.metadata?.reviews ?? 0,
-          tags: item.metadata?.tags ?? [],
-          trustedBySchools: item.metadata?.trusted_by_schools ?? false,
-          degree: item.metadata?.degree ?? "",
-          grades:
-            item.metadata?.grades?.map((grade) => ({
-              grade: grade.grade,
-              level: grade.level,
-              subject: grade.subject,
-            })) ?? [],
-          university: item.metadata?.university ?? "",
-        },
-      };
-    }),
+    items: tutors,
   };
 }
 
 export async function getTutorsPaginatedCached(
   pageNumber: number
 ): Promise<PageResponse<TutorWithPrices>> {
-  const supabase = await createClient();
-
   return unstable_cache(
-    () => getTutorsPaginated(supabase, pageNumber),
+    () => getTutorsPaginated(pageNumber),
     [`tutors-paginated-${pageNumber}`],
     {
       revalidate: 60 * 60 * 24 * 7, // 1 week

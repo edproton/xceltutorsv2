@@ -1,26 +1,11 @@
+import { TutorMetadata } from "@/lib/database/types";
+
 export interface TutorWithPrices {
   id: string;
   name: string;
   avatar: string;
   prices: number[];
-  metadata: {
-    bio: {
-      full: string;
-      short: string;
-      session: string;
-    };
-    completedLessons: number;
-    reviews: number;
-    tags: string[];
-    trustedBySchools: boolean;
-    degree: string;
-    grades: Array<{
-      grade: string;
-      level: string;
-      subject: string;
-    }>;
-    university: string;
-  };
+  metadata: TutorMetadata;
 }
 
 export interface PageResponse<T> {
