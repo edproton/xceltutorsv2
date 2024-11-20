@@ -51,7 +51,7 @@ import {
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { TutorWithAvailabilityAndServices } from "./types";
+import { GetTutorByIdQueryResponse } from "@/lib/queries/GetTutorByIdQuery";
 
 const weekdayIndexMap = {
   Monday: 0,
@@ -66,7 +66,7 @@ const weekdayIndexMap = {
 export default function ViewTutorsByIdPageContent({
   tutor: { id, name, avatar, metadata, availabilities, services, uiHelper },
 }: {
-  tutor: TutorWithAvailabilityAndServices;
+  tutor: GetTutorByIdQueryResponse;
 }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isAnimationComplete, setAnimationComplete] = useState(false);

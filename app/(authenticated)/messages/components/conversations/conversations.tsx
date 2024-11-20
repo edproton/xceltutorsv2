@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Profile } from "../../types";
 import ConversationItem from "./conversation-item";
-import { MessageContent } from "@/lib/database/types";
+import { MessageContent } from "@/lib/types";
 
 const supabase = createClient();
 

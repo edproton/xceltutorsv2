@@ -36,7 +36,11 @@ export default async function ViewTutorsPageWrapper({
   const { page } = await searchParams;
 
   const pageNumber = parsePageNumber(page);
-  const tutors = await getTutorsPaginated(pageNumber);
+  const { data: tutors, error } = await getTutorsPaginated(pageNumber);
+
+  if (error) {
+    return <div>Failed to load tutors</div>;
+  }
 
   if (pageNumber > tutors.totalPages) {
     redirect(`/view-tutors?page=${tutors.totalPages}`);

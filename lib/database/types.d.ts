@@ -3,7 +3,6 @@
  * Please do not edit it manually.
  */
 
-import { MessageContent } from "@/app/(authenticated)/messages/types";
 import type { ColumnType } from "kysely";
 
 export type AuthAalLevel = "aal1" | "aal2" | "aal3";
@@ -285,7 +284,7 @@ export interface Bookings {
   createdByProfileId: string;
   endTime: Timestamp;
   id: Generated<number>;
-  metadata: Metadata;
+  metadata: Json | null;
   paymentIntentId: string | null;
   paymentStatus: string | null;
   price: Numeric | null;
@@ -361,58 +360,8 @@ export interface Levels {
   subjectId: number;
 }
 
-export interface TextMessage {
-  type: "text";
-  text: string;
-}
-
-export type CardColor =
-  | "red"
-  | "blue"
-  | "green"
-  | "yellow"
-  | "purple"
-  | "gray"
-  | "pink"
-  | "teal"
-  | "cyan"
-  | "lime"
-  | "amber"
-  | "orange"
-  | "default";
-
-export interface CardMessage {
-  type: "card";
-  title: string;
-  description: string;
-  imageUrl?: string;
-  actions?: {
-    color?: CardColor;
-    label: string;
-    url?: string;
-    callback?: {
-      name: string;
-      params: Record<string, string>;
-    };
-  }[];
-}
-
-export type MessageContent = TextMessage | CardMessage;
-
-export type VisibleTo = "from" | "to" | "both";
-
-export interface Message {
-  id: number;
-  conversation_id: number;
-  sender_profile_id: string;
-  content: MessageContent[];
-  created_at: string;
-  is_read: boolean;
-  visible_to: VisibleTo;
-}
-
 export interface Messages {
-  content: MessageContent[];
+  content: Generated<Json>;
   conversationId: number | null;
   createdAt: Generated<Timestamp | null>;
   id: Generated<number>;
@@ -611,27 +560,10 @@ export interface SupabaseMigrationsSeedFiles {
   path: string;
 }
 
-export interface TutorBio {
-  full: string;
-  short: string;
-  session: string;
-}
-
-export interface TutorMetadata {
-  bio: TutorBio;
-  tags: string[];
-  degree: string;
-  grades: { grade: string; level: string; subject: string }[];
-  reviews: number;
-  university: string;
-  completedLessons: number;
-  trustedBySchools: boolean;
-}
-
 export interface Tutors {
   createdAt: Generated<Timestamp | null>;
   id: Generated<string>;
-  metadata: TutorMetadata;
+  metadata: Json;
   profileId: string;
 }
 

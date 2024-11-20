@@ -1,5 +1,5 @@
 import { Database as PostgresSchema } from "./database.types";
-import { MessageContent } from "./lib/database/types";
+import { MessageContent } from "./lib/types";
 
 type PostgresTables = PostgresSchema["public"]["Tables"];
 

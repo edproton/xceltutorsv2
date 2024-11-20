@@ -13,7 +13,7 @@ import { Check, CheckCheck, Eye, EyeOff, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { CallbackDialog } from "./callback-dialog";
 import DOMPurify from "dompurify";
-import { CardColor, MessageContent, Message } from "@/lib/database/types";
+import { CardColor, Message, MessageContent } from "@/lib/types";
 
 interface MessageBubbleProps {
   message: Message;

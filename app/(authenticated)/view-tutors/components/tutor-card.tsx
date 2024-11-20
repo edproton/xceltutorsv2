@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { TutorWithPrices } from "../types";
+import { GetTutorsPaginatedQueryResponseItem } from "@/lib/queries/GetTutorsPaginatedQuery";
 
 interface TutorCardProps {
-  tutor: TutorWithPrices;
+  tutor: GetTutorsPaginatedQueryResponseItem;
 }
 
 const tagColorMap: Record<string, string> = {

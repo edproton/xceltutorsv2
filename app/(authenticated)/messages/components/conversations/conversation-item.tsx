@@ -15,7 +15,7 @@ import {
   ArrowUpRight,
   ArrowUpDownIcon as ArrowsUpDown,
 } from "lucide-react";
-import { MessageContent } from "@/lib/database/types";
+import { MessageContent } from "@/lib/types";
 
 type ConversationItemProps = {
   conversation: Conversation;
