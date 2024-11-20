@@ -1,11 +1,11 @@
 import { db } from "@/lib/database";
 import { sql } from "kysely";
-import type {
+import {
   PageResponse,
   Booking,
   BookingType,
   BookingStatus,
-  Response,
+  ResponseWrapper,
 } from "@/lib/types";
 import { DateTime } from "luxon";
 
@@ -64,7 +64,7 @@ export class GetBookingsWithPaginationQuery {
   static async execute(
     pageNumber: number,
     pageSize: number = 5
-  ): Promise<Response<GetBookingsWithPaginationQueryResponse>> {
+  ): Promise<ResponseWrapper<GetBookingsWithPaginationQueryResponse>> {
     try {
       const offset = (pageNumber - 1) * pageSize;
 
@@ -109,7 +109,7 @@ export class GetBookingsWithPaginationQuery {
         .execute();
 
       if (!bookings.length) {
-        return { error: "No bookings found for the given page", data: null };
+        return ResponseWrapper.fail("No bookings found for the given page");
       }
 
       const totalItemsResult = await db
@@ -120,28 +120,25 @@ export class GetBookingsWithPaginationQuery {
       const totalItems = Number(totalItemsResult.count);
       const totalPages = Math.ceil(totalItems / pageSize);
 
-      return {
-        error: null,
-        data: {
-          items: bookings.map((booking) => this.transformBooking(booking)),
-          totalItems,
-          totalPages,
-          pageNumber,
-          pageSize,
-        },
+      const result = {
+        items: bookings.map((booking) => this.transformBooking(booking)),
+        totalItems,
+        totalPages,
+        pageNumber,
+        pageSize,
       };
+
+      return ResponseWrapper.success(result);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return {
-          error: `Failed to fetch bookings: ${error.message}`,
-          data: null,
-        };
+        return ResponseWrapper.fail(
+          `Failed to fetch bookings: ${error.message}`
+        );
       }
 
-      return {
-        error: "An unknown error occurred while fetching bookings.",
-        data: null,
-      };
+      return ResponseWrapper.fail(
+        "An unknown error occurred while fetching bookings."
+      );
     }
   }
 }

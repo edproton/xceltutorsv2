@@ -1,5 +1,6 @@
 import { db } from "@/lib/database";
 import { ResponseWrapper, TutorMetadata } from "@/lib/types";
+import { GetFreeMeetingQuery } from "./GetFreeMeetingQuery";
 
 type TutorRow = {
   id: string;
@@ -90,10 +91,13 @@ export class GetTutorByIdQuery {
     const uniquePrices = new Set(
       tutor.services.map((service) => Number(service.price))
     );
-    tutor.uiHelper.multiplePrices = {
-      minPrice: Math.min(...uniquePrices),
-      maxPrice: Math.max(...uniquePrices),
-    };
+
+    if (uniquePrices.size > 1) {
+      tutor.uiHelper.multiplePrices = {
+        minPrice: Math.min(...uniquePrices),
+        maxPrice: Math.max(...uniquePrices),
+      };
+    }
 
     return tutor;
   }
@@ -140,17 +144,16 @@ export class GetTutorByIdQuery {
 
     const tutorProfile = this.mapTutorData(data);
 
-    const freeBookingData = await db
-      .selectFrom("bookings")
-      .select("id")
-      .where("tutorId", "=", tutorId)
-      .where("createdByProfileId", "=", userId)
-      .where("type", "=", "Free Meeting")
-      .executeTakeFirst();
-
-    if (freeBookingData) {
-      tutorProfile.uiHelper.hasAlreadyHadDemoBooking = true;
+    const getFreeMeetingQueryResponse = await GetFreeMeetingQuery.execute(
+      userId,
+      tutorId
+    );
+    if (getFreeMeetingQueryResponse.error) {
+      return ResponseWrapper.fail(getFreeMeetingQueryResponse.error);
     }
+
+    tutorProfile.uiHelper.hasAlreadyHadDemoBooking =
+      getFreeMeetingQueryResponse.data === undefined;
 
     return ResponseWrapper.success(tutorProfile);
   }

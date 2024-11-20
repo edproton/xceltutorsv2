@@ -15,14 +15,14 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Search } from "lucide-react";
-import { TutorInfo } from "../../types";
 import { TutoringFormData } from "./schema";
 import { useState } from "react";
+import { GetTutorWithGroupedServicesQueryResponse } from "@/lib/queries/GetTutorWithGroupedServicesQuery";
 
 interface SubjectLevelSelectProps {
   control: Control<TutoringFormData>;
   errors: FieldErrors<TutoringFormData>;
-  tutor: TutorInfo;
+  tutor: GetTutorWithGroupedServicesQueryResponse;
   subjectOpen: boolean;
   setSubjectOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }

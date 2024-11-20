@@ -97,12 +97,22 @@ export type Booking = {
   };
 };
 
+export type Level = {
+  id: number;
+  name: string;
+};
+
 export type PageResponse<T> = {
   items: T[];
   pageSize: number;
   pageNumber: number;
   totalItems: number;
   totalPages: number;
+};
+
+export type ResponseError = {
+  message: string;
+  additionalData: Record<string, unknown>;
 };
 
 /**
@@ -120,7 +130,7 @@ export type Response<T> =
       /**
        * The error message describing why the response failed.
        */
-      error: string;
+      error: ResponseError;
     }
   | {
       /**
@@ -204,7 +214,11 @@ export class ResponseWrapper<T> {
    * @returns The error message if the response is a failure, or `null` if it is a success.
    */
   get error(): string | null {
-    return this.response.error;
+    return this.response.error?.message ?? null;
+  }
+
+  get errorData(): ResponseError | null {
+    return this.response.error ?? null;
   }
 
   /**
@@ -236,9 +250,18 @@ export class ResponseWrapper<T> {
    * Creates a failed `ResponseWrapper` with the provided error message.
    *
    * @param error - The error message to include in the response.
+   * @param additionalData - Additional data to include in the response.
    * @returns A `ResponseWrapper` instance representing a failure.
    */
-  static fail(error: string): ResponseWrapper<never> {
-    return ResponseWrapper.wrap({ error });
+  static fail(
+    error: string,
+    additionalData?: Record<string, unknown>
+  ): ResponseWrapper<never> {
+    return ResponseWrapper.wrap({
+      error: {
+        message: error,
+        additionalData: additionalData ?? {},
+      },
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
-import { getTutorWithGroupedServicesCached } from "./actions";
 import TutoringForm from "./components/tutoring-form";
+import { getTutorById } from "../actions";
+import { getTutorWithGroupedServices } from "./actions";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -8,13 +9,20 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const tutor = await getTutorWithGroupedServicesCached(id);
+  const tutor = await getTutorById(id);
+
+  if (!tutor) {
+    return {
+      title: "Tutor Not Found",
+      description: "The tutor you are looking for could not be found.",
+    };
+  }
 
   return {
-    title: `Free meeting with ${tutor.name} | Tutoring`,
-    description: `Schedule a free meeting with ${tutor.name}. Discuss your tutoring needs and see if it's a good fit.`,
+    title: `Free meeting with ${tutor.data.name} | Tutoring`,
+    description: `Schedule a free meeting with ${tutor.data.name}. Discuss your tutoring needs and see if it's a good fit.`,
     openGraph: {
-      images: [tutor.avatar],
+      images: [tutor.data.avatar],
     },
   };
 }
@@ -22,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ContactPage({ params }: Props) {
   const { id } = await params;
 
-  const tutor = await getTutorWithGroupedServicesCached(id);
+  const actionResult = await getTutorWithGroupedServices(id);
 
-  return <TutoringForm tutor={tutor} />;
+  return <TutoringForm tutor={actionResult} />;
 }

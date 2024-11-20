@@ -8,8 +8,8 @@ import {
   GraduationCap,
   HelpCircle,
 } from "lucide-react";
-import { TutorInfo } from "../../types";
 import DetailItem from "./detail-item";
+import { GetTutorWithGroupedServicesQueryResponse } from "@/lib/queries/GetTutorWithGroupedServicesQuery";
 
 interface WatchedFields {
   levelId?: number;
@@ -19,7 +19,7 @@ interface WatchedFields {
 }
 
 interface InfoCardProps {
-  tutor: TutorInfo;
+  tutor: GetTutorWithGroupedServicesQueryResponse;
   watchedFields: WatchedFields;
 }
 

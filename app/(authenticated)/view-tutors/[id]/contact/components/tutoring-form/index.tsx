@@ -13,11 +13,15 @@ import SubmitButton from "./submit-button";
 import InfoCard from "./info-card";
 import FAQSection from "./faq-section";
 import { submitTutoringRequest } from "./actions";
-import { TutorInfo } from "../../types";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
+import { GetTutorWithGroupedServicesQueryResponse } from "@/lib/queries/GetTutorWithGroupedServicesQuery";
 
-export default function TutoringForm({ tutor }: { tutor: TutorInfo }) {
+export default function TutoringForm({
+  tutor,
+}: {
+  tutor: GetTutorWithGroupedServicesQueryResponse;
+}) {
   const [subjectOpen, setSubjectOpen] = useState(false);
   const router = useRouter();
   const {

@@ -52,6 +52,8 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { GetTutorByIdQueryResponse } from "@/lib/queries/GetTutorByIdQuery";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 const weekdayIndexMap = {
   Monday: 0,
@@ -78,6 +80,27 @@ export default function ViewTutorsByIdPageContent({
   const sessionsRef = useRef<HTMLParagraphElement>(null);
   const [isAboutOverflowing, setIsAboutOverflowing] = useState(false);
   const [isSessionsOverflowing, setIsSessionsOverflowing] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const freeMeetingParam = searchParams.get("freeMeeting") === "true";
+    if (freeMeetingParam) {
+      const params = new URLSearchParams(searchParams);
+      params.delete("freeMeeting");
+      router.replace(`${pathname}?${params.toString()}`);
+
+      setTimeout(() => {
+        toast({
+          title: `Free Meeting Already Booked with ${name}`,
+          description:
+            "You already have a free meeting booked. Please reach out to the tutor to schedule a time or reschedule your booking.",
+          variant: "destructive",
+        });
+      }, 0);
+    }
+  }, [searchParams, router, pathname, name]);
 
   useEffect(() => {
     if (aboutRef.current) {
@@ -227,14 +250,21 @@ export default function ViewTutorsByIdPageContent({
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Tutor Impact</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex flex-col items-center text-center">
-            <Star className="w-8 h-8 text-primary mb-2" />
-            <span className="text-2xl font-bold">{metadata.reviews}</span>
-            <span className="text-sm text-muted-foreground">
-              Received reviews
-            </span>
-          </div>
+        <CardContent
+          className={`grid gap-4 ${
+            metadata.reviews > 0 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
+          }`}
+        >
+          {metadata.reviews > 0 && (
+            <div className="flex flex-col items-center text-center">
+              <Star className="w-8 h-8 text-primary mb-2" />
+              <span className="text-2xl font-bold">{metadata.reviews}</span>
+              <span className="text-sm text-muted-foreground">
+                Received reviews
+              </span>
+            </div>
+          )}
+
           <div className="flex flex-col items-center text-center">
             <Clock className="w-8 h-8 text-primary mb-2" />
             <span className="text-2xl font-bold">
