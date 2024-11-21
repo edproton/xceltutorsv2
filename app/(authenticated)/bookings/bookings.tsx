@@ -56,7 +56,7 @@ const dialogOptions: DialogOption[] = [
   {
     label: "Reschedule lesson",
     component: RescheduleDialog,
-    roles: ["tutor"],
+    roles: ["tutor", "student"],
   },
   {
     label: "Cancel lesson",
