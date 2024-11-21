@@ -20,7 +20,7 @@ export async function getTutorWithGroupedServices(tutorId: string) {
     tutorId
   );
 
-  if (!getFreeMeetingQuery.error && !getFreeMeetingQuery.data) {
+  if (!getFreeMeetingQuery.error && getFreeMeetingQuery.data) {
     redirect(`/view-tutors/${tutorId}?freeMeeting=true`);
   }
 

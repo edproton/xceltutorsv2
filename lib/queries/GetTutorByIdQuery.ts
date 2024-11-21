@@ -148,12 +148,13 @@ export class GetTutorByIdQuery {
       userId,
       tutorId
     );
+
     if (getFreeMeetingQueryResponse.error) {
       return ResponseWrapper.fail(getFreeMeetingQueryResponse.error);
     }
 
     tutorProfile.uiHelper.hasAlreadyHadDemoBooking =
-      getFreeMeetingQueryResponse.data === undefined;
+      getFreeMeetingQueryResponse.data !== undefined;
 
     return ResponseWrapper.success(tutorProfile);
   }
