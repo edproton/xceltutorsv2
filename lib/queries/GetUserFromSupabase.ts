@@ -1,14 +1,16 @@
 import { createClient } from "../supabase/server";
 import { ResponseWrapper } from "../types";
-type GetAuthenticatedUserQueryResponse = {
+
+type GetUserFromSupabaseQueryResponse = {
   user: {
     id: string;
+    email: string;
   };
 };
 
-export class GetAuthenticatedUserQuery {
+export class GetUserFromSupabaseQuery {
   static async execute(): Promise<
-    ResponseWrapper<GetAuthenticatedUserQueryResponse>
+    ResponseWrapper<GetUserFromSupabaseQueryResponse>
   > {
     try {
       const supabase = await createClient();
@@ -22,9 +24,14 @@ export class GetAuthenticatedUserQuery {
         return ResponseWrapper.fail(error.message);
       }
 
+      if (!user || !user?.email || !user?.id) {
+        return ResponseWrapper.fail("User not found");
+      }
+
       return ResponseWrapper.success({
         user: {
-          id: user!.id,
+          id: user.id,
+          email: user.email,
         },
       });
     } catch (e: unknown) {

@@ -2,7 +2,7 @@
 
 import { actionClient, ResultError } from "@/lib/safe-action";
 import { tutoringFormSchema } from "./schema";
-import { GetAuthenticatedUserQuery } from "@/lib/queries/GetUserFromSupabase";
+import { GetUserFromSupabaseQuery } from "@/lib/queries/GetUserFromSupabase";
 import { BookingDemoRequestCommand } from "@/lib/commands/BookingDemoRequestCommand ";
 
 export const submitTutoringRequest = actionClient
@@ -10,7 +10,7 @@ export const submitTutoringRequest = actionClient
   .action(async ({ parsedInput }) => {
     const {
       data: { user },
-    } = await GetAuthenticatedUserQuery.execute();
+    } = await GetUserFromSupabaseQuery.execute();
     if (!user) {
       throw new Error("User not found");
     }

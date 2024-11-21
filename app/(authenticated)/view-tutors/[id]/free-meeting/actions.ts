@@ -2,7 +2,7 @@
 
 import { GetFreeMeetingQuery } from "@/lib/queries/GetFreeMeetingQuery";
 import { GetTutorWithGroupedServicesQuery } from "@/lib/queries/GetTutorWithGroupedServicesQuery";
-import { GetAuthenticatedUserQuery } from "@/lib/queries/GetUserFromSupabase";
+import { GetUserFromSupabaseQuery } from "@/lib/queries/GetUserFromSupabase";
 import { ResultError } from "@/lib/safe-action";
 import { redirect } from "next/navigation";
 
@@ -10,7 +10,7 @@ export async function getTutorWithGroupedServices(tutorId: string) {
   const {
     error: userError,
     data: { user },
-  } = await GetAuthenticatedUserQuery.execute();
+  } = await GetUserFromSupabaseQuery.execute();
   if (userError) {
     throw new ResultError(userError);
   }
