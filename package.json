@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "check": "pnpm run lint && pnpm run type-check"
+    "check": "pnpm run lint && pnpm run type-check",
+    "generate-db-types": "kysely-codegen --camel-case --out-file ./lib/database/types.d.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

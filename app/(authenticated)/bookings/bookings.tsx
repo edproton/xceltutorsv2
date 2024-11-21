@@ -30,6 +30,7 @@ import CancelDialog from "./dialogs/cancel-dialog";
 import ConfirmationDialog from "./dialogs/confirmation-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { Profile, Role, type BookingStatus } from "@/lib/types";
+import ConfirmPaymentDialog from "./dialogs/confirm-payment-dialog";
 
 interface BookingsProps {
   bookings: GetBookingsWithPaginationQueryResponseItem[];
@@ -44,6 +45,7 @@ type DialogComponent = React.ComponentType<{
   oppositeParty: Profile;
   onCancel?: (reason: string) => void;
   onSendConfirmation?: (message: string) => void;
+  onConfirmPayment?: (payNow: boolean) => void;
 }>;
 
 interface DialogOption {
@@ -81,6 +83,8 @@ export default function Bookings({
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
+  const [isConfirmPaymentDialogOpen, setIsConfirmPaymentDialogOpen] =
+    useState(false);
 
   const handleOpenDialog = (
     booking: GetBookingsWithPaginationQueryResponseItem,
@@ -88,6 +92,13 @@ export default function Bookings({
   ) => {
     setSelectedBooking(booking);
     setOpenDialog(dialog);
+  };
+
+  const handleConfirmPayment = (
+    booking: GetBookingsWithPaginationQueryResponseItem
+  ) => {
+    setSelectedBooking(booking);
+    setIsConfirmPaymentDialogOpen(true);
   };
 
   const onCancelLesson = (reason: string) => {
@@ -102,6 +113,15 @@ export default function Bookings({
       `Confirmation sent for ${selectedBooking?.createdBy.name}. Message: ${message}`
     );
     // Here you would typically call an API to send the confirmation
+  };
+
+  const onConfirmPayment = (payNow: boolean) => {
+    console.log(
+      `Payment ${payNow ? "confirmed" : "deferred"} for ${
+        selectedBooking?.createdBy.name
+      }.`
+    );
+    // Here you would typically call an API to process the payment or update the booking status
   };
 
   const filteredBookings =
@@ -192,6 +212,14 @@ export default function Bookings({
                           {booking.subject.name} {booking.subject.level.name}
                         </span>
                         <BookingStatus status={booking.status} />
+                        {role === "student" &&
+                          booking.status === "AwaitingTutorConfirmation" && (
+                            <Button
+                              onClick={() => handleConfirmPayment(booking)}
+                            >
+                              Confirm
+                            </Button>
+                          )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -236,6 +264,16 @@ export default function Bookings({
           oppositeParty={oppositeParty}
           onCancel={onCancelLesson}
           onSendConfirmation={onSendConfirmation}
+          onConfirmPayment={onConfirmPayment}
+        />
+      )}
+      {selectedBooking && (
+        <ConfirmPaymentDialog
+          open={isConfirmPaymentDialogOpen}
+          onOpenChange={setIsConfirmPaymentDialogOpen}
+          booking={selectedBooking}
+          oppositeParty={oppositeParty}
+          onConfirmPayment={onConfirmPayment}
         />
       )}
     </div>
@@ -244,25 +282,32 @@ export default function Bookings({
 
 function BookingStatus({ status }: { status: BookingStatus }) {
   switch (status) {
-    case "Confirmed":
+    case "Scheduled":
       return (
         <div className="flex items-center text-green-600">
           <CheckCircle2 className="mr-1 h-4 w-4" />
-          <span className="text-sm">Confirmed</span>
+          <span className="text-sm">Scheduled</span>
         </div>
       );
-    case "WaitingPayment":
+    case "AwaitingPayment":
       return (
         <div className="flex items-center text-yellow-600">
           <Clock className="mr-1 h-4 w-4" />
-          <span className="text-sm">Waiting Payment</span>
+          <span className="text-sm">Awaiting Payment</span>
         </div>
       );
-    case "PendingDate":
+    case "AwaitingTutorConfirmation":
       return (
         <div className="flex items-center text-blue-600">
           <Clock className="mr-1 h-4 w-4" />
-          <span className="text-sm">Pending Date</span>
+          <span className="text-sm">Awaiting Tutor Confirmation</span>
+        </div>
+      );
+    case "AwaitingStudentConfirmation":
+      return (
+        <div className="flex items-center text-orange-600">
+          <Clock className="mr-1 h-4 w-4" />
+          <span className="text-sm">Awaiting Student Confirmation</span>
         </div>
       );
     case "PaymentFailed":

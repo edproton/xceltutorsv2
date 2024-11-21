@@ -80,7 +80,7 @@ export class BookingDemoRequestCommand {
           type: "Free Meeting",
           startTime: startTimeUTC.toJSDate(),
           endTime: endTimeUTC.toJSDate(),
-          status: "PendingDate",
+          status: "AwaitingTutorConfirmation",
           metadata: {
             levelId: booking.levelId,
           },

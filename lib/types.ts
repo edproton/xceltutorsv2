@@ -66,12 +66,13 @@ export interface TutorMetadata {
 }
 
 export type BookingStatus =
-  | "PendingDate"
-  | "WaitingPayment"
-  | "PaymentFailed"
-  | "Confirmed"
-  | "Canceled"
-  | "Completed";
+  | "AwaitingTutorConfirmation" // The tutor needs to confirm their availability.
+  | "AwaitingStudentConfirmation" // The student needs to confirm and pay.
+  | "AwaitingPayment" // The payment is pending.
+  | "PaymentFailed" // Payment attempt failed.
+  | "Scheduled" // Booking is confirmed, scheduled for the agreed date and time.
+  | "Canceled" // Booking was canceled.
+  | "Completed"; // Booking has been completed.
 
 export type BookingType = "Free Meeting" | "Lesson";
 
