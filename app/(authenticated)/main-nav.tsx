@@ -15,13 +15,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GetUserProfileQueryResponse } from "@/lib/queries/GetUserProfileQuery";
 
 interface MainNavProps {
-  name: string;
-  avatar: string | null;
+  user: GetUserProfileQueryResponse;
 }
 
-export default function MainNav({ name, avatar }: MainNavProps) {
+export default function MainNav({ user }: MainNavProps) {
+  const { name, avatar, role } = user;
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -51,6 +52,7 @@ export default function MainNav({ name, avatar }: MainNavProps) {
     {
       href: "/view-tutors",
       label: "Find a tutor",
+      roles: ["student"],
     },
     {
       href: "/messages",
@@ -69,6 +71,14 @@ export default function MainNav({ name, avatar }: MainNavProps) {
       label: "Refer a friend",
     },
   ];
+
+  const filteredRoutes = routes.filter((route) => {
+    if (route.roles) {
+      return route.roles.includes(role);
+    }
+
+    return true;
+  });
 
   const getInitials = (name: string) => {
     return name
@@ -89,7 +99,7 @@ export default function MainNav({ name, avatar }: MainNavProps) {
         </div>
         <div className="hidden md:flex flex-1 justify-center">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {routes.map((route) => (
+            {filteredRoutes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
@@ -154,7 +164,7 @@ export default function MainNav({ name, avatar }: MainNavProps) {
               <span className="font-bold">xceltutors</span>
             </Link>
             <nav className="mt-8 flex flex-col space-y-3">
-              {routes.map((route) => (
+              {filteredRoutes.map((route) => (
                 <Link
                   key={route.href}
                   href={route.href}

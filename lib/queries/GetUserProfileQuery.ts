@@ -1,21 +1,13 @@
 import { db } from "@/lib/database";
-import { Profile, ResponseWrapper } from "@/lib/types";
+import { Profile, ResponseWrapper, Role } from "@/lib/types";
 
 type UserProfileDBResult = Profile;
 
-export type GetUserProfileQueryResponse = Profile;
+export type GetUserProfileQueryResponse = Profile & {
+  role: Role;
+};
 
 export class GetUserProfileQuery {
-  private static transformUserProfile(
-    profile: UserProfileDBResult
-  ): GetUserProfileQueryResponse {
-    return {
-      id: profile.id,
-      name: profile.name,
-      avatar: profile.avatar,
-    };
-  }
-
   static async execute(
     userId: string
   ): Promise<ResponseWrapper<GetUserProfileQueryResponse>> {
@@ -31,7 +23,22 @@ export class GetUserProfileQuery {
         return ResponseWrapper.fail("User profile not found.");
       }
 
-      return ResponseWrapper.success(this.transformUserProfile(userProfile));
+      const isTutor = await db
+        .selectFrom("tutors")
+        .select("profileId")
+        .where("profileId", "=", userProfile.id)
+        .limit(1)
+        .executeTakeFirst()
+        .then((result) => !!result);
+
+      const result: GetUserProfileQueryResponse = {
+        id: userProfile.id,
+        name: userProfile.name,
+        avatar: userProfile.avatar,
+        role: isTutor ? "tutor" : "student",
+      };
+
+      return ResponseWrapper.success(result);
     } catch (error: unknown) {
       if (error instanceof Error) {
         return ResponseWrapper.fail(
