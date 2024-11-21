@@ -186,7 +186,7 @@ export default function ViewTutorsByIdPageContent({
           <CardContent className="p-6 space-y-6 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
             <div className="text-center space-y-2">
               <h3 className="font-semibold text-lg">
-                <Link href={`/view-tutors/${id}/contact`}>
+                <Link href={`/view-tutors/${id}/free-meeting`}>
                   Get in touch with {name.split(" ")[0]}
                 </Link>
               </h3>
@@ -203,7 +203,7 @@ export default function ViewTutorsByIdPageContent({
                     size="lg"
                     asChild
                   >
-                    <Link href={`/view-tutors/${id}/contact`}>
+                    <Link href={`/view-tutors/${id}/free-meeting`}>
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Get in touch
                     </Link>
