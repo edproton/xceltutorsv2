@@ -31,6 +31,7 @@ import ConfirmationDialog from "./dialogs/confirmation-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { Profile, Role, type BookingStatus } from "@/lib/types";
 import ConfirmPaymentDialog from "./dialogs/confirm-payment-dialog";
+import TutorConfirmationDialog from "./dialogs/tutor-confirmation-dialog";
 
 interface BookingsProps {
   bookings: GetBookingsWithPaginationQueryResponseItem[];
@@ -85,6 +86,8 @@ export default function Bookings({
   );
   const [isConfirmPaymentDialogOpen, setIsConfirmPaymentDialogOpen] =
     useState(false);
+  const [isTutorConfirmationDialogOpen, setIsTutorConfirmationDialogOpen] =
+    useState(false);
 
   const handleOpenDialog = (
     booking: GetBookingsWithPaginationQueryResponseItem,
@@ -101,6 +104,13 @@ export default function Bookings({
     setIsConfirmPaymentDialogOpen(true);
   };
 
+  const handleConfirmSchedule = (
+    booking: GetBookingsWithPaginationQueryResponseItem
+  ) => {
+    setSelectedBooking(booking);
+    setIsTutorConfirmationDialogOpen(true);
+  };
+
   const onCancelLesson = (reason: string) => {
     console.log(
       `Lesson cancelled for ${selectedBooking?.createdBy.name}. Reason: ${reason}`
@@ -113,15 +123,6 @@ export default function Bookings({
       `Confirmation sent for ${selectedBooking?.createdBy.name}. Message: ${message}`
     );
     // Here you would typically call an API to send the confirmation
-  };
-
-  const onConfirmPayment = (payNow: boolean) => {
-    console.log(
-      `Payment ${payNow ? "confirmed" : "deferred"} for ${
-        selectedBooking?.createdBy.name
-      }.`
-    );
-    // Here you would typically call an API to process the payment or update the booking status
   };
 
   const filteredBookings =
@@ -213,13 +214,18 @@ export default function Bookings({
                         </span>
                         <BookingStatus status={booking.status} />
                         {role === "student" &&
-                          booking.status === "AwaitingTutorConfirmation" && (
-                            <Button
-                              onClick={() => handleConfirmPayment(booking)}
-                            >
-                              Confirm
-                            </Button>
-                          )}
+                        booking.status === "AwaitingPayment" ? (
+                          <Button onClick={() => handleConfirmPayment(booking)}>
+                            Confirm
+                          </Button>
+                        ) : role === "tutor" &&
+                          booking.status === "AwaitingTutorConfirmation" ? (
+                          <Button
+                            onClick={() => handleConfirmSchedule(booking)}
+                          >
+                            Confirm
+                          </Button>
+                        ) : null}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -264,18 +270,31 @@ export default function Bookings({
           oppositeParty={oppositeParty}
           onCancel={onCancelLesson}
           onSendConfirmation={onSendConfirmation}
-          onConfirmPayment={onConfirmPayment}
         />
       )}
-      {selectedBooking && (
-        <ConfirmPaymentDialog
-          open={isConfirmPaymentDialogOpen}
-          onOpenChange={setIsConfirmPaymentDialogOpen}
-          booking={selectedBooking}
-          oppositeParty={oppositeParty}
-          onConfirmPayment={onConfirmPayment}
-        />
-      )}
+      {selectedBooking &&
+        role === "student" &&
+        selectedBooking.status === "AwaitingPayment" && (
+          <ConfirmPaymentDialog
+            open={isConfirmPaymentDialogOpen}
+            onOpenChange={setIsConfirmPaymentDialogOpen}
+            booking={selectedBooking}
+            oppositeParty={oppositeParty}
+          />
+        )}
+
+      {selectedBooking &&
+        role === "tutor" &&
+        selectedBooking.status === "AwaitingTutorConfirmation" && (
+          <TutorConfirmationDialog
+            open={isTutorConfirmationDialogOpen}
+            bookingId={selectedBooking.id}
+            onOpenChange={setIsTutorConfirmationDialogOpen}
+            studentName={oppositeParty.name}
+            onConfirm={() => setIsTutorConfirmationDialogOpen(false)}
+            lessonDate={selectedBooking.startTime}
+          />
+        )}
     </div>
   );
 }

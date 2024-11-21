@@ -16,21 +16,17 @@ interface ConfirmPaymentDialogProps {
   onOpenChange: (open: boolean) => void;
   booking: GetBookingsWithPaginationQueryResponseItem;
   oppositeParty: Profile;
-  onConfirmPayment: (payNow: boolean) => void;
 }
 
 export default function ConfirmPaymentDialog({
   open,
   onOpenChange,
-  onConfirmPayment,
 }: ConfirmPaymentDialogProps) {
   const handleConfirmAndPay = () => {
-    onConfirmPayment(true);
     onOpenChange(false);
   };
 
   const handleConfirmAndPayLater = () => {
-    onConfirmPayment(false);
     onOpenChange(false);
   };
 
