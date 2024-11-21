@@ -9,15 +9,12 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 
 export default async function BookingsPage() {
   const getBookingsQuery = await getBookingsWithPaginationQuery();
 
-  if (getBookingsQuery.error) {
-    return <div>Error loading bookings</div>;
-  }
-
-  if (getBookingsQuery.data.items.length === 0) {
+  if (getBookingsQuery.bookings.items.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Card className="w-full max-w-md text-center">
@@ -28,8 +25,8 @@ export default async function BookingsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              It looks like you haven't made any bookings yet. To get started,
-              select a tutor and book your first lesson!
+              {`It looks like you haven't made any bookings yet. To get started,
+              select a tutor and book your first lesson!`}
             </p>
           </CardContent>
           <CardFooter className="flex justify-center">
@@ -42,9 +39,21 @@ export default async function BookingsPage() {
     );
   }
 
+  function getOppositeParty(
+    booking: GetBookingsWithPaginationQueryResponseItem
+  ) {
+    const isTutor = booking.forTutor.id === getBookingsQuery.userId;
+    const oppositeParty = isTutor ? booking.createdBy : booking.forTutor;
+
+    return oppositeParty;
+  }
+
   return (
     <div className="container mx-auto px-4">
-      <Bookings bookings={getBookingsQuery.data.items} />
+      <Bookings
+        bookings={getBookingsQuery.bookings.items}
+        oppositeParty={getOppositeParty(getBookingsQuery.bookings.items[0])}
+      />
     </div>
   );
 }

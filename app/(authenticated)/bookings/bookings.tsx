@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,13 +28,14 @@ import { DateTime } from "luxon";
 import RescheduleDialog from "./dialogs/reschedule-dialog";
 import CancelDialog from "./dialogs/cancel-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { type BookingStatus } from "@/lib/types";
+import { Profile, type BookingStatus } from "@/lib/types";
 
 interface BookingsProps {
   bookings: GetBookingsWithPaginationQueryResponseItem[];
+  oppositeParty: Profile;
 }
 
-export default function Bookings({ bookings }: BookingsProps) {
+export default function Bookings({ bookings, oppositeParty }: BookingsProps) {
   const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] =
@@ -112,65 +113,72 @@ export default function Bookings({ bookings }: BookingsProps) {
               <div key={group} className="space-y-4">
                 <h2 className="text-lg font-semibold">{group}</h2>
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarFallback>
-                            {booking.createdBy.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {DateTime.fromISO(booking.startTime).toFormat(
-                              "ccc dd LLL, HH:mm"
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {true ? "Weekly lesson" : "One-time lesson"}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {booking.type}
+                  {bookings.map((booking) => {
+                    return (
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between rounded-lg border p-4"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage
+                              src={oppositeParty.avatar}
+                              alt={oppositeParty.name}
+                            />
+
+                            <AvatarFallback>
+                              {oppositeParty.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">
+                              {DateTime.fromISO(booking.startTime).toFormat(
+                                "ccc dd LLL, HH:mm"
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {true ? "Weekly lesson" : "One-time lesson"}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {booking.type}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center space-x-4">
+                          <span className="font-medium">
+                            {oppositeParty.name}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {booking.subject.name} {booking.subject.level.name}
+                          </span>
+                          <BookingStatus status={booking.status} />
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onSelect={() => handleReschedule(booking)}
+                              >
+                                Reschedule lesson
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => handleCancel(booking)}
+                              >
+                                Cancel lesson
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="font-medium">
-                          {booking.createdBy.name}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {booking.subject.name} {booking.subject.level.name}
-                        </span>
-                        <BookingStatus status={booking.status} />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onSelect={() => handleReschedule(booking)}
-                            >
-                              Reschedule lesson
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onSelect={() => handleCancel(booking)}
-                            >
-                              Cancel lesson
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -188,11 +196,13 @@ export default function Bookings({ bookings }: BookingsProps) {
             open={isRescheduleDialogOpen}
             onOpenChange={setIsRescheduleDialogOpen}
             booking={selectedBooking}
+            oppositeParty={oppositeParty}
           />
           <CancelDialog
             open={isCancelDialogOpen}
             onOpenChange={setIsCancelDialogOpen}
             booking={selectedBooking}
+            oppositeParty={oppositeParty}
             onCancel={onCancelLesson}
           />
         </>

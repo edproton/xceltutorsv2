@@ -12,14 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import * as React from "react";
-import { Booking } from "../types";
 import { DateTime } from "luxon";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import { Profile } from "@/lib/types";
 
 interface CancelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  booking: Booking;
+  booking: GetBookingsWithPaginationQueryResponseItem;
   onCancel: (reason: string) => void;
+  oppositeParty: Profile;
 }
 
 export default function CancelDialog({
@@ -27,6 +29,7 @@ export default function CancelDialog({
   onOpenChange,
   booking,
   onCancel,
+  oppositeParty,
 }: CancelDialogProps) {
   const [reason, setReason] = React.useState("");
 
@@ -48,11 +51,13 @@ export default function CancelDialog({
           <CardContent className="pt-6">
             <h2 className="text-lg font-medium mb-2">Lesson details</h2>
             <p className="text-sm text-muted-foreground">
-              {booking.studentName}
+              {oppositeParty.name}
             </p>
-            <p className="text-sm text-muted-foreground">{booking.subject}</p>
             <p className="text-sm text-muted-foreground">
-              {DateTime.fromISO(booking.dateTime).toFormat(
+              {booking.subject.name}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {DateTime.fromISO(booking.startTime).toFormat(
                 "EEEE, MMMM d, yyyy 'at' h:mm a"
               )}
             </p>
@@ -64,7 +69,7 @@ export default function CancelDialog({
               <Label htmlFor="reason">Reason for cancellation</Label>
               <Textarea
                 id="reason"
-                placeholder={`Let ${booking.studentName} know why you're cancelling this lesson`}
+                placeholder={`Let ${oppositeParty.name} know why you're cancelling this lesson`}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="min-h-[100px]"

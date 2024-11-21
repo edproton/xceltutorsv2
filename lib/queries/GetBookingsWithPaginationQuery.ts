@@ -7,7 +7,6 @@ import {
   BookingStatus,
   ResponseWrapper,
 } from "@/lib/types";
-import { DateTime } from "luxon";
 import { convertToLondonTime } from "../utils";
 
 type BookingDBResult = {

@@ -50,10 +50,10 @@ export class GetBookingByIdQuery {
         name: booking.forTutorName,
         avatar: booking.forTutorAvatar,
       },
-      level: {
-        name: booking.levelName,
-        subject: {
-          name: booking.subjectName,
+      subject: {
+        name: booking.subjectName,
+        level: {
+          name: booking.levelName,
         },
       },
     };

@@ -23,20 +23,23 @@ import {
 import { cn } from "@/lib/utils";
 import { DateTime } from "luxon";
 import { Card, CardContent } from "@/components/ui/card";
-import { Booking } from "../types";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import { Profile } from "@/lib/types";
 
 interface RescheduleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  booking: Booking;
+  booking: GetBookingsWithPaginationQueryResponseItem;
+  oppositeParty: Profile;
 }
 
 export default function RescheduleDialog({
   open,
   onOpenChange,
   booking,
+  oppositeParty,
 }: RescheduleDialogProps) {
-  const bookingDateTime = DateTime.fromISO(booking.dateTime);
+  const bookingDateTime = DateTime.fromISO(booking.startTime);
   const [date, setDate] = React.useState<Date | undefined>(
     bookingDateTime.toJSDate()
   );
@@ -71,7 +74,7 @@ export default function RescheduleDialog({
             <CardContent className="pt-6">
               <h2 className="text-lg font-medium mb-2">Current booking</h2>
               <p className="text-sm text-muted-foreground">
-                {booking.studentName}
+                {oppositeParty.name}
               </p>
               <p className="text-sm text-muted-foreground">
                 {bookingDateTime.toFormat("EEEE, MMMM d, yyyy 'at' h:mm a")}
@@ -81,7 +84,7 @@ export default function RescheduleDialog({
 
           <div className="space-y-4">
             <h2 className="text-lg font-medium">
-              Suggest a new time to {booking.studentName}
+              Suggest a new time to {oppositeParty.name}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -160,11 +163,11 @@ export default function RescheduleDialog({
 
           <div className="space-y-2">
             <Label htmlFor="message">
-              Send {booking.studentName} a message (optional)
+              Send {oppositeParty.name} a message (optional)
             </Label>
             <Textarea
               id="message"
-              placeholder={`Let ${booking.studentName} know why you're proposing a new time`}
+              placeholder={`Let ${oppositeParty.name} know why you're proposing a new time`}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="min-h-[100px]"

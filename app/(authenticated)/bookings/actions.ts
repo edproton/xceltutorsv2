@@ -11,5 +11,10 @@ export const getBookingsWithPaginationQuery = async () => {
       1
     );
 
-  return getBookingsWithPaginationQuery;
+  const user = await GetAuthenticatedUserQuery.execute();
+
+  return {
+    bookings: getBookingsWithPaginationQuery.data,
+    userId: user.data.user.id,
+  };
 };
