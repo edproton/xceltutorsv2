@@ -81,6 +81,8 @@ export type Profile = {
   avatar: string;
 };
 
+export type Role = "tutor" | "student";
+
 export type Booking = {
   id: number;
   startTime: string; // London ISO string

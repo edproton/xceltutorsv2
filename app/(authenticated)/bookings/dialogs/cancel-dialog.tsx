@@ -20,8 +20,9 @@ interface CancelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   booking: GetBookingsWithPaginationQueryResponseItem;
-  onCancel: (reason: string) => void;
   oppositeParty: Profile;
+  onCancel?: (reason: string) => void;
+  onSendConfirmation?: (message: string) => void; // Add this line
 }
 
 export default function CancelDialog({
@@ -35,7 +36,11 @@ export default function CancelDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onCancel(reason);
+
+    if (onCancel) {
+      onCancel(reason);
+    }
+
     onOpenChange(false);
   };
 

@@ -10,6 +10,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import { Profile, Role } from "@/lib/types";
 
 export default async function BookingsPage() {
   const getBookingsQuery = await getBookingsWithPaginationQuery();
@@ -41,18 +42,29 @@ export default async function BookingsPage() {
 
   function getOppositeParty(
     booking: GetBookingsWithPaginationQueryResponseItem
-  ) {
+  ): {
+    oppositeParty: Profile;
+    role: Role;
+  } {
     const isTutor = booking.forTutor.id === getBookingsQuery.userId;
     const oppositeParty = isTutor ? booking.createdBy : booking.forTutor;
 
-    return oppositeParty;
+    return {
+      oppositeParty,
+      role: isTutor ? "tutor" : "student",
+    };
   }
+
+  const { role, oppositeParty } = getOppositeParty(
+    getBookingsQuery.bookings.items[0]
+  );
 
   return (
     <div className="container mx-auto px-4">
       <Bookings
         bookings={getBookingsQuery.bookings.items}
-        oppositeParty={getOppositeParty(getBookingsQuery.bookings.items[0])}
+        role={role}
+        oppositeParty={oppositeParty}
       />
     </div>
   );

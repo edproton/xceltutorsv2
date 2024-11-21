@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { DateTime } from "luxon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,39 +25,69 @@ import {
   XCircle,
   MoreVertical,
 } from "lucide-react";
-import { useState } from "react";
-import { DateTime } from "luxon";
 import RescheduleDialog from "./dialogs/reschedule-dialog";
 import CancelDialog from "./dialogs/cancel-dialog";
+import ConfirmationDialog from "./dialogs/confirmation-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile, type BookingStatus } from "@/lib/types";
+import { Profile, Role, type BookingStatus } from "@/lib/types";
 
 interface BookingsProps {
   bookings: GetBookingsWithPaginationQueryResponseItem[];
   oppositeParty: Profile;
+  role: Role;
 }
 
-export default function Bookings({ bookings, oppositeParty }: BookingsProps) {
-  const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false);
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+type DialogComponent = React.ComponentType<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  booking: GetBookingsWithPaginationQueryResponseItem;
+  oppositeParty: Profile;
+  onCancel?: (reason: string) => void;
+  onSendConfirmation?: (message: string) => void;
+}>;
+
+interface DialogOption {
+  label: string;
+  component: DialogComponent;
+  roles: Role[];
+}
+
+const dialogOptions: DialogOption[] = [
+  {
+    label: "Reschedule lesson",
+    component: RescheduleDialog,
+    roles: ["tutor"],
+  },
+  {
+    label: "Cancel lesson",
+    component: CancelDialog,
+    roles: ["tutor", "student"],
+  },
+  {
+    label: "Send confirmation",
+    component: ConfirmationDialog,
+    roles: ["tutor"],
+  },
+];
+
+export default function Bookings({
+  bookings,
+  oppositeParty,
+  role,
+}: BookingsProps) {
+  const [openDialog, setOpenDialog] = useState<DialogOption | null>(null);
   const [selectedBooking, setSelectedBooking] =
     useState<GetBookingsWithPaginationQueryResponseItem | null>(null);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
 
-  const handleReschedule = (
-    booking: GetBookingsWithPaginationQueryResponseItem
+  const handleOpenDialog = (
+    booking: GetBookingsWithPaginationQueryResponseItem,
+    dialog: DialogOption
   ) => {
     setSelectedBooking(booking);
-    setIsRescheduleDialogOpen(true);
-  };
-
-  const handleCancel = (
-    booking: GetBookingsWithPaginationQueryResponseItem
-  ) => {
-    setSelectedBooking(booking);
-    setIsCancelDialogOpen(true);
+    setOpenDialog(dialog);
   };
 
   const onCancelLesson = (reason: string) => {
@@ -63,6 +95,13 @@ export default function Bookings({ bookings, oppositeParty }: BookingsProps) {
       `Lesson cancelled for ${selectedBooking?.createdBy.name}. Reason: ${reason}`
     );
     // Here you would typically call an API to cancel the lesson
+  };
+
+  const onSendConfirmation = (message: string) => {
+    console.log(
+      `Confirmation sent for ${selectedBooking?.createdBy.name}. Message: ${message}`
+    );
+    // Here you would typically call an API to send the confirmation
   };
 
   const filteredBookings =
@@ -113,72 +152,71 @@ export default function Bookings({ bookings, oppositeParty }: BookingsProps) {
               <div key={group} className="space-y-4">
                 <h2 className="text-lg font-semibold">{group}</h2>
                 <div className="space-y-4">
-                  {bookings.map((booking) => {
-                    return (
-                      <div
-                        key={booking.id}
-                        className="flex items-center justify-between rounded-lg border p-4"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <Avatar>
-                            <AvatarImage
-                              src={oppositeParty.avatar}
-                              alt={oppositeParty.name}
-                            />
-
-                            <AvatarFallback>
-                              {oppositeParty.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">
-                              {DateTime.fromISO(booking.startTime).toFormat(
-                                "ccc dd LLL, HH:mm"
-                              )}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {true ? "Weekly lesson" : "One-time lesson"}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {booking.type}
-                            </div>
+                  {bookings.map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="flex items-center justify-between rounded-lg border p-4"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <Avatar>
+                          <AvatarImage
+                            src={oppositeParty.avatar}
+                            alt={oppositeParty.name}
+                          />
+                          <AvatarFallback>
+                            {oppositeParty.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {DateTime.fromISO(booking.startTime).toFormat(
+                              "ccc dd LLL, HH:mm"
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {true ? "Weekly lesson" : "One-time lesson"}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {booking.type}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <span className="font-medium">
-                            {oppositeParty.name}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {booking.subject.name} {booking.subject.level.name}
-                          </span>
-                          <BookingStatus status={booking.status} />
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onSelect={() => handleReschedule(booking)}
-                              >
-                                Reschedule lesson
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onSelect={() => handleCancel(booking)}
-                              >
-                                Cancel lesson
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
                       </div>
-                    );
-                  })}
+                      <div className="flex items-center space-x-4">
+                        <span className="font-medium">
+                          {oppositeParty.name}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {booking.subject.name} {booking.subject.level.name}
+                        </span>
+                        <BookingStatus status={booking.status} />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {dialogOptions
+                              .filter((option) => option.roles.includes(role))
+                              .map((option) => (
+                                <DropdownMenuItem
+                                  key={option.label}
+                                  onSelect={() =>
+                                    handleOpenDialog(booking, option)
+                                  }
+                                >
+                                  {option.label}
+                                </DropdownMenuItem>
+                              ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
@@ -190,22 +228,15 @@ export default function Bookings({ bookings, oppositeParty }: BookingsProps) {
           </TabsContent>
         </Tabs>
       </main>
-      {selectedBooking && (
-        <>
-          <RescheduleDialog
-            open={isRescheduleDialogOpen}
-            onOpenChange={setIsRescheduleDialogOpen}
-            booking={selectedBooking}
-            oppositeParty={oppositeParty}
-          />
-          <CancelDialog
-            open={isCancelDialogOpen}
-            onOpenChange={setIsCancelDialogOpen}
-            booking={selectedBooking}
-            oppositeParty={oppositeParty}
-            onCancel={onCancelLesson}
-          />
-        </>
+      {selectedBooking && openDialog && (
+        <openDialog.component
+          open={!!openDialog}
+          onOpenChange={() => setOpenDialog(null)}
+          booking={selectedBooking}
+          oppositeParty={oppositeParty}
+          onCancel={onCancelLesson}
+          onSendConfirmation={onSendConfirmation}
+        />
       )}
     </div>
   );
