@@ -8,6 +8,7 @@ import {
   ResponseWrapper,
 } from "@/lib/types";
 import { DateTime } from "luxon";
+import { convertToLondonTime } from "../utils";
 
 type BookingDBResult = {
   id: number;
@@ -29,17 +30,11 @@ export type GetBookingsWithPaginationQueryResponseItem = Booking;
 export type GetBookingsWithPaginationQueryResponse = PageResponse<Booking>;
 
 export class GetBookingsWithPaginationQuery {
-  private static convertToLondonTime(utcTime: string): string {
-    return DateTime.fromISO(utcTime, { zone: "utc" })
-      .setZone("Europe/London")
-      .toISO()!;
-  }
-
   private static transformBooking(booking: BookingDBResult): Booking {
     return {
       id: booking.id,
-      startTime: this.convertToLondonTime(booking.startTime.toISOString()),
-      endTime: this.convertToLondonTime(booking.endTime.toISOString()),
+      startTime: convertToLondonTime(booking.startTime.toISOString()),
+      endTime: convertToLondonTime(booking.endTime.toISOString()),
       status: booking.status,
       type: booking.type,
       createdBy: {
@@ -52,16 +47,17 @@ export class GetBookingsWithPaginationQuery {
         name: booking.forTutorName,
         avatar: booking.forTutorAvatar,
       },
-      level: {
-        name: booking.levelName,
-        subject: {
-          name: booking.subjectName,
+      subject: {
+        name: booking.subjectName,
+        level: {
+          name: booking.levelName,
         },
       },
     };
   }
 
   static async execute(
+    userId: string,
     pageNumber: number,
     pageSize: number = 5
   ): Promise<ResponseWrapper<GetBookingsWithPaginationQueryResponse>> {
@@ -103,12 +99,18 @@ export class GetBookingsWithPaginationQuery {
           "levels.name as levelName",
           "subjects.name as subjectName",
         ])
+        .where((eb) =>
+          eb.or([
+            eb("createdBy.id", "=", userId),
+            eb("forTutor.id", "=", userId),
+          ])
+        )
         .offset(offset)
         .limit(pageSize)
         .$narrowType<BookingDBResult>()
         .execute();
 
-      if (!bookings.length) {
+      if (!bookings) {
         return ResponseWrapper.fail("No bookings found for the given page");
       }
 

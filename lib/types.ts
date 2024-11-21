@@ -89,9 +89,9 @@ export type Booking = {
   status: BookingStatus;
   createdBy: Profile;
   forTutor: Profile;
-  level: {
+  subject: {
     name: string;
-    subject: {
+    level: {
       name: string;
     };
   };

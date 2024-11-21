@@ -27,33 +27,39 @@ import { useState } from "react";
 import { DateTime } from "luxon";
 import RescheduleDialog from "./dialogs/reschedule-dialog";
 import CancelDialog from "./dialogs/cancel-dialog";
-import { Booking, type BookingStatus } from "./types";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import { type BookingStatus } from "@/lib/types";
 
 interface BookingsProps {
-  bookings: Booking[];
+  bookings: GetBookingsWithPaginationQueryResponseItem[];
 }
 
 export default function Bookings({ bookings }: BookingsProps) {
   const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<GetBookingsWithPaginationQueryResponseItem | null>(null);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
 
-  const handleReschedule = (booking: Booking) => {
+  const handleReschedule = (
+    booking: GetBookingsWithPaginationQueryResponseItem
+  ) => {
     setSelectedBooking(booking);
     setIsRescheduleDialogOpen(true);
   };
 
-  const handleCancel = (booking: Booking) => {
+  const handleCancel = (
+    booking: GetBookingsWithPaginationQueryResponseItem
+  ) => {
     setSelectedBooking(booking);
     setIsCancelDialogOpen(true);
   };
 
   const onCancelLesson = (reason: string) => {
     console.log(
-      `Lesson cancelled for ${selectedBooking?.studentName}. Reason: ${reason}`
+      `Lesson cancelled for ${selectedBooking?.createdBy.name}. Reason: ${reason}`
     );
     // Here you would typically call an API to cancel the lesson
   };
@@ -64,13 +70,13 @@ export default function Bookings({ bookings }: BookingsProps) {
       : bookings.filter((booking) => booking.status === statusFilter);
 
   const groupedBookings = filteredBookings.reduce((acc, booking) => {
-    const key = getBookingGroup(DateTime.fromISO(booking.dateTime));
+    const key = getBookingGroup(DateTime.fromISO(booking.startTime));
     if (!acc[key]) {
       acc[key] = [];
     }
     acc[key].push(booking);
     return acc;
-  }, {} as Record<string, Booking[]>);
+  }, {} as Record<string, GetBookingsWithPaginationQueryResponseItem[]>);
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,7 +120,7 @@ export default function Bookings({ bookings }: BookingsProps) {
                       <div className="flex items-center space-x-4">
                         <Avatar>
                           <AvatarFallback>
-                            {booking.studentName
+                            {booking.createdBy.name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
@@ -122,26 +128,24 @@ export default function Bookings({ bookings }: BookingsProps) {
                         </Avatar>
                         <div>
                           <div className="font-medium">
-                            {DateTime.fromISO(booking.dateTime).toFormat(
+                            {DateTime.fromISO(booking.startTime).toFormat(
                               "ccc dd LLL, HH:mm"
                             )}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {booking.isRecurring
-                              ? "Weekly lesson"
-                              : "One-time lesson"}
+                            {true ? "Weekly lesson" : "One-time lesson"}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {booking.bookingType}
+                            {booking.type}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
                         <span className="font-medium">
-                          {booking.studentName}
+                          {booking.createdBy.name}
                         </span>
                         <span className="text-muted-foreground">
-                          {booking.subject}
+                          {booking.subject.name} {booking.subject.level.name}
                         </span>
                         <BookingStatus status={booking.status} />
                         <DropdownMenu>
