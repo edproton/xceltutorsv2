@@ -90,7 +90,7 @@ export default function MessageBubble({
       case "to":
         return {
           icon: <EyeOff className="h-3 w-3" />,
-          text: "Only visible to recipient",
+          text: "Only visible to you",
         };
       default:
         return null;
