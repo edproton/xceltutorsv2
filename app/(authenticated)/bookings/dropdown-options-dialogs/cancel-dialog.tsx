@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import * as React from "react";
 import { DateTime } from "luxon";
-import { DialogProps } from "../item/dialog-options";
+import { DialogProps } from ".";
 
 export default function CancelDialog({
   open,

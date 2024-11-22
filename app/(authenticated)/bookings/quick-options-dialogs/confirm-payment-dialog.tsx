@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CreditCard, Clock } from "lucide-react";
-import { DialogProps } from "../item/dialog-options";
+import { DialogProps } from "../dropdown-options-dialogs";
 
 export default function ConfirmPaymentDialog({
   open,

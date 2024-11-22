@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DateTime } from "luxon";
 import { Card, CardContent } from "@/components/ui/card";
-import { DialogProps } from "../item/dialog-options";
+import { DialogProps } from ".";
 
 export default function RescheduleDialog({
   open,

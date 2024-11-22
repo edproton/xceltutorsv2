@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Profile, Role, BookingStatus } from "@/lib/types";
 import { BookingItem } from "./item/booking-item";
-import { DialogOption } from "./item/dialog-options";
+import { DialogOption } from "./dropdown-options-dialogs";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import {
   initializeBookingsStore,

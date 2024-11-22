@@ -8,19 +8,19 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CalendarIcon, CheckCircle } from "lucide-react";
-import { studentConfirmationBookingQuery } from "../actions";
+import { tutorConfirmationBookingQuery } from "../actions";
 import { toast } from "@/hooks/use-toast";
 import { useBookingsStore } from "../store/bookingStore";
-import { DialogProps } from "../item/dialog-options";
+import { DialogProps } from "../dropdown-options-dialogs";
 
-export default function StudentConfirmationDialog({
+export default function TutorConfirmationDialog({
   open,
   onOpenChange,
   booking,
 }: DialogProps) {
   const updateBooking = useBookingsStore((state) => state.updateBooking);
   const handleConfirm = async () => {
-    const result = await studentConfirmationBookingQuery({
+    const result = await tutorConfirmationBookingQuery({
       bookingId: booking.id,
     });
 

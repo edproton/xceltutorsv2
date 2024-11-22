@@ -1,8 +1,8 @@
 import { BookingStatus, Role } from "@/lib/types";
-import CancelDialog from "../dropdown-options/cancel-dialog";
+import CancelDialog from "./cancel-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import ResendConfirmationMessageDialog from "../dropdown-options/resend-confirmation-message-dialog";
-import RescheduleDialog from "../dropdown-options/reschedule-dialog";
+import ResendConfirmationMessageDialog from "./resend-confirmation-message-dialog";
+import RescheduleDialog from "./reschedule-dialog";
 
 export interface DialogOption {
   label: string;

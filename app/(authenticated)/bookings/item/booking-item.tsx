@@ -10,7 +10,7 @@ import {
 import { MoreVertical } from "lucide-react";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { Role } from "@/lib/types";
-import { DialogOption, dropdownOptions } from "./dialog-options";
+import { DialogOption, dropdownOptions } from "../dropdown-options-dialogs";
 import { QuickActionButton } from "./quick-action-button";
 import { BookingStatusBadge } from "./booking-status-badge";
 

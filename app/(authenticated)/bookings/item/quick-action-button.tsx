@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BookingStatus, Role } from "@/lib/types";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import ConfirmPaymentDialog from "../dialogs/confirm-payment-dialog";
-import TutorConfirmationDialog from "../dialogs/tutor-confirmation-dialog";
-import { DialogProps } from "./dialog-options";
+import ConfirmPaymentDialog from "../quick-options-dialogs/confirm-payment-dialog";
+import TutorConfirmationDialog from "../quick-options-dialogs/tutor-confirmation-dialog";
+import { DialogProps } from "../dropdown-options-dialogs";
 
 interface QuickActionButtonProps {
   role: Role;

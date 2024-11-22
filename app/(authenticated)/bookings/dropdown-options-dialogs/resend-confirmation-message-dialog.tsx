@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { DateTime } from "luxon";
-import { DialogProps } from "../item/dialog-options";
+import { DialogProps } from ".";
 
 export default function ResendConfirmationMessageDialog({
   open,
