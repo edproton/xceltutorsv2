@@ -13,6 +13,7 @@ import { DialogProps } from "../item/dialog-options";
 export default function ConfirmPaymentDialog({
   open,
   onOpenChange,
+  booking,
 }: DialogProps) {
   const handleConfirmAndPayLater = () => {
     onOpenChange(false);
@@ -29,6 +30,7 @@ export default function ConfirmPaymentDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <form action="/api/payment" method="POST">
+            <input type="hidden" name="bookingId" value={booking.id} />
             <Button className="w-full">
               <CreditCard className="mr-2 h-4 w-4" />
               Confirm & Pay
