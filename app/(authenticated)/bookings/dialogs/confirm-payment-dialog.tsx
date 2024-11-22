@@ -8,14 +8,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile } from "@/lib/types";
 import { CreditCard, Clock } from "lucide-react";
 
 interface ConfirmPaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
   booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: Profile;
 }
 
 export default function ConfirmPaymentDialog({

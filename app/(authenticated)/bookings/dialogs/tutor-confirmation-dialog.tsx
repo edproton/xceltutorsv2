@@ -10,27 +10,24 @@ import {
 import { CalendarIcon, CheckCircle } from "lucide-react";
 import { confirmAwaitingPaymentBookingQuery } from "../actions";
 import { toast } from "@/hooks/use-toast";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 
 interface TutorConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  studentName: string;
-  lessonDate: string;
   onConfirm: () => void;
-  bookingId: number;
+  booking: GetBookingsWithPaginationQueryResponseItem;
 }
 
 export default function TutorConfirmationDialog({
   open,
   onOpenChange,
-  studentName,
-  lessonDate,
   onConfirm,
-  bookingId,
+  booking,
 }: TutorConfirmationDialogProps) {
   const handleConfirm = async () => {
     const result = await confirmAwaitingPaymentBookingQuery({
-      bookingId,
+      bookingId: booking.id,
     });
 
     if (result?.serverError) {
@@ -42,7 +39,7 @@ export default function TutorConfirmationDialog({
     } else {
       toast({
         title: "Schedule Confirmed",
-        description: `You have successfully confirmed the lesson with ${studentName}.`,
+        description: `You have successfully confirmed the lesson with ${booking.createdBy.name}.`,
         variant: "success",
       });
 
@@ -56,14 +53,16 @@ export default function TutorConfirmationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Confirm Schedule with {studentName}</DialogTitle>
+          <DialogTitle>
+            Confirm Schedule with {booking.forTutor.name}
+          </DialogTitle>
           <DialogDescription>
             Are you sure you want to confirm this lesson schedule?
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 py-4">
           <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-          <span>{lessonDate}</span>
+          <span>{booking.endTime}</span>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

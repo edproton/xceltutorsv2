@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { DateTime } from "luxon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -18,60 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  XCircle,
-  MoreVertical,
-} from "lucide-react";
-import RescheduleDialog from "./dialogs/reschedule-dialog";
-import CancelDialog from "./dialogs/cancel-dialog";
-import ConfirmationDialog from "./dialogs/confirmation-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile, Role, type BookingStatus } from "@/lib/types";
-import ConfirmPaymentDialog from "./dialogs/confirm-payment-dialog";
-import TutorConfirmationDialog from "./dialogs/tutor-confirmation-dialog";
+import { Profile, Role, BookingStatus } from "@/lib/types";
+import { BookingItem } from "./item/booking-item";
+import { DialogOption, dialogOptions } from "./item/dialog-options";
 
 interface BookingsProps {
   bookings: GetBookingsWithPaginationQueryResponseItem[];
   oppositeParty: Profile;
   role: Role;
 }
-
-type DialogComponent = React.ComponentType<{
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: Profile;
-  onCancel?: (reason: string) => void;
-  onSendConfirmation?: (message: string) => void;
-  onConfirmPayment?: (payNow: boolean) => void;
-}>;
-
-interface DialogOption {
-  label: string;
-  component: DialogComponent;
-  roles: Role[];
-}
-
-const dialogOptions: DialogOption[] = [
-  {
-    label: "Reschedule lesson",
-    component: RescheduleDialog,
-    roles: ["tutor", "student"],
-  },
-  {
-    label: "Cancel lesson",
-    component: CancelDialog,
-    roles: ["tutor", "student"],
-  },
-  {
-    label: "Send confirmation",
-    component: ConfirmationDialog,
-    roles: ["tutor"],
-  },
-];
 
 export default function Bookings({
   bookings,
@@ -84,10 +33,6 @@ export default function Bookings({
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
     "all"
   );
-  const [isConfirmPaymentDialogOpen, setIsConfirmPaymentDialogOpen] =
-    useState(false);
-  const [isTutorConfirmationDialogOpen, setIsTutorConfirmationDialogOpen] =
-    useState(false);
 
   const handleOpenDialog = (
     booking: GetBookingsWithPaginationQueryResponseItem,
@@ -100,15 +45,15 @@ export default function Bookings({
   const handleConfirmPayment = (
     booking: GetBookingsWithPaginationQueryResponseItem
   ) => {
-    setSelectedBooking(booking);
-    setIsConfirmPaymentDialogOpen(true);
+    // Implement confirm payment logic here
+    console.log("Confirming payment for booking:", booking.id);
   };
 
   const handleConfirmSchedule = (
     booking: GetBookingsWithPaginationQueryResponseItem
   ) => {
-    setSelectedBooking(booking);
-    setIsTutorConfirmationDialogOpen(true);
+    // Implement confirm schedule logic here
+    console.log("Confirming schedule for booking:", booking.id);
   };
 
   const onCancelLesson = (reason: string) => {
@@ -169,87 +114,21 @@ export default function Bookings({
             </Select>
           </div>
           <TabsContent value="upcoming" className="mt-6 space-y-8">
-            {Object.entries(groupedBookings).map(([group, bookings]) => (
+            {Object.entries(groupedBookings).map(([group, groupBookings]) => (
               <div key={group} className="space-y-4">
                 <h2 className="text-lg font-semibold">{group}</h2>
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div
+                  {groupBookings.map((booking) => (
+                    <BookingItem
                       key={booking.id}
-                      className="flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage
-                            src={oppositeParty.avatar}
-                            alt={oppositeParty.name}
-                          />
-                          <AvatarFallback>
-                            {oppositeParty.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {DateTime.fromISO(booking.startTime).toFormat(
-                              "ccc dd LLL, HH:mm"
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {true ? "Weekly lesson" : "One-time lesson"}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {booking.type}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="font-medium">
-                          {oppositeParty.name}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {booking.subject.name} {booking.subject.level.name}
-                        </span>
-                        <BookingStatus status={booking.status} />
-                        {role === "student" &&
-                        booking.status === "AwaitingPayment" ? (
-                          <Button onClick={() => handleConfirmPayment(booking)}>
-                            Confirm
-                          </Button>
-                        ) : role === "tutor" &&
-                          booking.status === "AwaitingTutorConfirmation" ? (
-                          <Button
-                            onClick={() => handleConfirmSchedule(booking)}
-                          >
-                            Confirm
-                          </Button>
-                        ) : null}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {dialogOptions
-                              .filter((option) => option.roles.includes(role))
-                              .map((option) => (
-                                <DropdownMenuItem
-                                  key={option.label}
-                                  onSelect={() =>
-                                    handleOpenDialog(booking, option)
-                                  }
-                                >
-                                  {option.label}
-                                </DropdownMenuItem>
-                              ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
+                      booking={booking}
+                      oppositeParty={oppositeParty}
+                      role={role}
+                      onOpenDialog={handleOpenDialog}
+                      onConfirmPayment={handleConfirmPayment}
+                      onConfirmSchedule={handleConfirmSchedule}
+                      dialogOptions={dialogOptions}
+                    />
                   ))}
                 </div>
               </div>
@@ -272,87 +151,8 @@ export default function Bookings({
           onSendConfirmation={onSendConfirmation}
         />
       )}
-      {selectedBooking &&
-        role === "student" &&
-        selectedBooking.status === "AwaitingPayment" && (
-          <ConfirmPaymentDialog
-            open={isConfirmPaymentDialogOpen}
-            onOpenChange={setIsConfirmPaymentDialogOpen}
-            booking={selectedBooking}
-            oppositeParty={oppositeParty}
-          />
-        )}
-
-      {selectedBooking &&
-        role === "tutor" &&
-        selectedBooking.status === "AwaitingTutorConfirmation" && (
-          <TutorConfirmationDialog
-            open={isTutorConfirmationDialogOpen}
-            bookingId={selectedBooking.id}
-            onOpenChange={setIsTutorConfirmationDialogOpen}
-            studentName={oppositeParty.name}
-            onConfirm={() => setIsTutorConfirmationDialogOpen(false)}
-            lessonDate={selectedBooking.startTime}
-          />
-        )}
     </div>
   );
-}
-
-function BookingStatus({ status }: { status: BookingStatus }) {
-  switch (status) {
-    case "Scheduled":
-      return (
-        <div className="flex items-center text-green-600">
-          <CheckCircle2 className="mr-1 h-4 w-4" />
-          <span className="text-sm">Scheduled</span>
-        </div>
-      );
-    case "AwaitingPayment":
-      return (
-        <div className="flex items-center text-yellow-600">
-          <Clock className="mr-1 h-4 w-4" />
-          <span className="text-sm">Awaiting Payment</span>
-        </div>
-      );
-    case "AwaitingTutorConfirmation":
-      return (
-        <div className="flex items-center text-blue-600">
-          <Clock className="mr-1 h-4 w-4" />
-          <span className="text-sm">Awaiting Tutor Confirmation</span>
-        </div>
-      );
-    case "AwaitingStudentConfirmation":
-      return (
-        <div className="flex items-center text-orange-600">
-          <Clock className="mr-1 h-4 w-4" />
-          <span className="text-sm">Awaiting Student Confirmation</span>
-        </div>
-      );
-    case "PaymentFailed":
-      return (
-        <div className="flex items-center text-red-600">
-          <AlertTriangle className="mr-1 h-4 w-4" />
-          <span className="text-sm">Payment Failed</span>
-        </div>
-      );
-    case "Canceled":
-      return (
-        <div className="flex items-center text-gray-600">
-          <XCircle className="mr-1 h-4 w-4" />
-          <span className="text-sm">Canceled</span>
-        </div>
-      );
-    case "Completed":
-      return (
-        <div className="flex items-center text-green-600">
-          <CheckCircle2 className="mr-1 h-4 w-4" />
-          <span className="text-sm">Completed</span>
-        </div>
-      );
-    default:
-      return null;
-  }
 }
 
 function getBookingGroup(dateTime: DateTime): string {
