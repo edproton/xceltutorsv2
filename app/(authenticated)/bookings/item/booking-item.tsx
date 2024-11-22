@@ -10,7 +10,7 @@ import {
 import { MoreVertical } from "lucide-react";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { Role } from "@/lib/types";
-import { DialogOption, dialogOptions } from "./dialog-options";
+import { DialogOption, dropdownOptions } from "./dialog-options";
 import { QuickActionButton } from "./quick-action-button";
 import { BookingStatusBadge } from "./booking-status-badge";
 
@@ -24,7 +24,7 @@ interface BookingItemProps {
 }
 
 export function BookingItem({ booking, role, onOpenDialog }: BookingItemProps) {
-  const availableDialogOptions = dialogOptions.filter(
+  const availableDialogOptions = dropdownOptions.filter(
     (option) =>
       option.roles.includes(role) &&
       (!option.status || option.status.includes(booking.status))

@@ -1,8 +1,8 @@
 import { BookingStatus, Role } from "@/lib/types";
-import CancelDialog from "../dialogs/cancel-dialog";
-import ConfirmationDialog from "../dialogs/confirmation-dialog";
-import RescheduleDialog from "../dialogs/reschedule-dialog";
+import CancelDialog from "../dropdown-options/cancel-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import ResendConfirmationMessageDialog from "../dropdown-options/resend-confirmation-message-dialog";
+import RescheduleDialog from "../dropdown-options/reschedule-dialog";
 
 export interface DialogOption {
   label: string;
@@ -17,7 +17,7 @@ export interface DialogProps {
   booking: GetBookingsWithPaginationQueryResponseItem;
 }
 
-export const dialogOptions: DialogOption[] = [
+export const dropdownOptions: DialogOption[] = [
   {
     label: "Reschedule lesson",
     component: RescheduleDialog,
@@ -42,8 +42,8 @@ export const dialogOptions: DialogOption[] = [
     ],
   },
   {
-    label: "Send confirmation",
-    component: ConfirmationDialog,
+    label: "Resend confirmation",
+    component: ResendConfirmationMessageDialog,
     roles: ["tutor"],
     status: ["AwaitingStudentConfirmation", "AwaitingPayment"],
   },
