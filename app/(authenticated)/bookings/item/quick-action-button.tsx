@@ -10,7 +10,6 @@ import { DialogProps } from "./dialog-options";
 
 interface QuickActionButtonProps {
   role: Role;
-  status: BookingStatus;
   booking: GetBookingsWithPaginationQueryResponseItem;
 }
 
@@ -36,15 +35,12 @@ export const quickActions: QuickAction[] = [
   },
 ];
 
-export function QuickActionButton({
-  role,
-  status,
-  booking,
-}: QuickActionButtonProps) {
+export function QuickActionButton({ role, booking }: QuickActionButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const action = quickActions.find(
-    (action) => action.roles.includes(role) && action.status.includes(status)
+    (action) =>
+      action.roles.includes(role) && action.status.includes(booking.status)
   );
 
   if (!action) {

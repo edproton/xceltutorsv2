@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Profile, Role, BookingStatus } from "@/lib/types";
 import { BookingItem } from "./item/booking-item";
-import { DialogOption, dialogOptions } from "./item/dialog-options";
+import { DialogOption } from "./item/dialog-options";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import {
   initializeBookingsStore,
@@ -98,7 +98,6 @@ export default function Bookings({ initialBookings, role }: BookingsProps) {
                       booking={booking}
                       role={role}
                       onOpenDialog={handleOpenDialog}
-                      dialogOptions={dialogOptions}
                     />
                   ))}
                 </div>
