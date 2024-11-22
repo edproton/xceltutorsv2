@@ -25,19 +25,27 @@ import { useBookingsStore } from "../store/bookingStore";
 export default function RescheduleDialog() {
   const { selectedBooking, setOpenDialog } = useBookingsStore();
 
-  if (!selectedBooking) return null;
-
-  const bookingDateTime = DateTime.fromISO(selectedBooking.startTime);
-  const [date, setDate] = React.useState<Date | undefined>(
-    bookingDateTime.toJSDate()
-  );
-  const [time, setTime] = React.useState(bookingDateTime.toFormat("HH:mm"));
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
+  const [time, setTime] = React.useState("");
   const [rescheduleType, setRescheduleType] = React.useState("single");
   const [message, setMessage] = React.useState("");
 
+  React.useEffect(() => {
+    if (selectedBooking) {
+      const bookingDateTime = DateTime.fromISO(selectedBooking.startTime);
+      setDate(bookingDateTime.toJSDate());
+      setTime(bookingDateTime.toFormat("HH:mm"));
+    }
+  }, [selectedBooking]);
+
+  if (!selectedBooking) return null;
+
+  const bookingDateTime = DateTime.fromISO(selectedBooking.startTime);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newDateTime = DateTime.fromJSDate(date!).set({
+    if (!date) return;
+    const newDateTime = DateTime.fromJSDate(date).set({
       hour: parseInt(time.split(":")[0]),
       minute: parseInt(time.split(":")[1]),
     });

@@ -23,7 +23,7 @@ export default function ConfirmPaymentDialog() {
       <DialogHeader>
         <DialogTitle>Confirm Booking</DialogTitle>
         <DialogDescription>
-          Choose how you'd like to proceed with your booking.
+          {`Choose how you'd like to proceed with your booking.`}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
@@ -43,9 +43,9 @@ export default function ConfirmPaymentDialog() {
           Confirm & Pay Later
         </Button>
         <p className="text-sm text-muted-foreground">
-          By selecting "Confirm & Pay Later", your lesson will be in "Waiting
+          {`By selecting "Confirm & Pay Later", your lesson will be in "Waiting
           for Payment" status. You'll have 12 hours before the lesson to
-          complete the payment.
+          complete the payment.`}
         </p>
       </div>
       <DialogFooter>
