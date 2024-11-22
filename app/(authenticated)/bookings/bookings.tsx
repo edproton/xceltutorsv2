@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateTime } from "luxon";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,28 +10,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { Profile, Role, BookingStatus } from "@/lib/types";
 import { BookingItem } from "./item/booking-item";
 import { DialogOption, dialogOptions } from "./item/dialog-options";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
+import {
+  initializeBookingsStore,
+  useBookingsStore,
+} from "./store/bookingStore";
 
 interface BookingsProps {
-  bookings: GetBookingsWithPaginationQueryResponseItem[];
+  initialBookings: GetBookingsWithPaginationQueryResponseItem[];
   oppositeParty: Profile;
   role: Role;
 }
 
-export default function Bookings({
-  bookings,
-  oppositeParty,
-  role,
-}: BookingsProps) {
+export default function Bookings({ initialBookings, role }: BookingsProps) {
+  const { bookings, statusFilter, setStatusFilter } = useBookingsStore();
+
+  useEffect(() => {
+    initializeBookingsStore(initialBookings);
+  }, [initialBookings]);
+
   const [openDialog, setOpenDialog] = useState<DialogOption | null>(null);
   const [selectedBooking, setSelectedBooking] =
     useState<GetBookingsWithPaginationQueryResponseItem | null>(null);
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">(
-    "all"
-  );
 
   const handleOpenDialog = (
     booking: GetBookingsWithPaginationQueryResponseItem,
@@ -40,34 +42,6 @@ export default function Bookings({
   ) => {
     setSelectedBooking(booking);
     setOpenDialog(dialog);
-  };
-
-  const handleConfirmPayment = (
-    booking: GetBookingsWithPaginationQueryResponseItem
-  ) => {
-    // Implement confirm payment logic here
-    console.log("Confirming payment for booking:", booking.id);
-  };
-
-  const handleConfirmSchedule = (
-    booking: GetBookingsWithPaginationQueryResponseItem
-  ) => {
-    // Implement confirm schedule logic here
-    console.log("Confirming schedule for booking:", booking.id);
-  };
-
-  const onCancelLesson = (reason: string) => {
-    console.log(
-      `Lesson cancelled for ${selectedBooking?.createdBy.name}. Reason: ${reason}`
-    );
-    // Here you would typically call an API to cancel the lesson
-  };
-
-  const onSendConfirmation = (message: string) => {
-    console.log(
-      `Confirmation sent for ${selectedBooking?.createdBy.name}. Message: ${message}`
-    );
-    // Here you would typically call an API to send the confirmation
   };
 
   const filteredBookings =
@@ -122,11 +96,8 @@ export default function Bookings({
                     <BookingItem
                       key={booking.id}
                       booking={booking}
-                      oppositeParty={oppositeParty}
                       role={role}
                       onOpenDialog={handleOpenDialog}
-                      onConfirmPayment={handleConfirmPayment}
-                      onConfirmSchedule={handleConfirmSchedule}
                       dialogOptions={dialogOptions}
                     />
                   ))}
@@ -146,9 +117,6 @@ export default function Bookings({
           open={!!openDialog}
           onOpenChange={() => setOpenDialog(null)}
           booking={selectedBooking}
-          oppositeParty={oppositeParty}
-          onCancel={onCancelLesson}
-          onSendConfirmation={onSendConfirmation}
         />
       )}
     </div>

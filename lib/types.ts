@@ -84,6 +84,10 @@ export type Profile = {
 
 export type Role = "tutor" | "student";
 
+export type User = Profile & {
+  role: Role;
+};
+
 export type Booking = {
   id: number;
   startTime: string; // London ISO string

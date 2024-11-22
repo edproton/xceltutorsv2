@@ -2,12 +2,19 @@ import { BookingStatus, Role } from "@/lib/types";
 import CancelDialog from "../dialogs/cancel-dialog";
 import ConfirmationDialog from "../dialogs/confirmation-dialog";
 import RescheduleDialog from "../dialogs/reschedule-dialog";
+import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 
 export interface DialogOption {
   label: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType<DialogProps>;
   roles: Role[];
   status?: BookingStatus[];
+}
+
+export interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  booking: GetBookingsWithPaginationQueryResponseItem;
 }
 
 export const dialogOptions: DialogOption[] = [

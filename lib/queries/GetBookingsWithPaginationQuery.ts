@@ -6,6 +6,8 @@ import {
   BookingType,
   BookingStatus,
   ResponseWrapper,
+  User,
+  Profile,
 } from "@/lib/types";
 import { convertToLondonTime } from "../utils";
 
@@ -25,8 +27,12 @@ type BookingDBResult = {
   subjectName: string;
 };
 
-export type GetBookingsWithPaginationQueryResponseItem = Booking;
-export type GetBookingsWithPaginationQueryResponse = PageResponse<Booking>;
+export type GetBookingsWithPaginationQueryResponseItem = Booking & {
+  oppositeParty: Profile;
+};
+
+export type GetBookingsWithPaginationQueryResponse =
+  PageResponse<GetBookingsWithPaginationQueryResponseItem>;
 
 export class GetBookingsWithPaginationQuery {
   private static transformBooking(booking: BookingDBResult): Booking {
@@ -56,7 +62,7 @@ export class GetBookingsWithPaginationQuery {
   }
 
   static async execute(
-    userId: string,
+    user: User,
     pageNumber: number,
     pageSize: number = 5
   ): Promise<ResponseWrapper<GetBookingsWithPaginationQueryResponse>> {
@@ -100,8 +106,8 @@ export class GetBookingsWithPaginationQuery {
         ])
         .where((eb) =>
           eb.or([
-            eb("createdBy.id", "=", userId),
-            eb("forTutor.id", "=", userId),
+            eb("createdBy.id", "=", user.id),
+            eb("forTutor.id", "=", user.id),
           ])
         )
         .offset(offset)
@@ -122,7 +128,19 @@ export class GetBookingsWithPaginationQuery {
       const totalPages = Math.ceil(totalItems / pageSize);
 
       const result = {
-        items: bookings.map((booking) => this.transformBooking(booking)),
+        items: bookings.map((booking) => {
+          const mappedBooking = this.transformBooking(booking);
+
+          const oppositeParty =
+            user.role === "student"
+              ? mappedBooking.forTutor
+              : mappedBooking.createdBy;
+
+          return {
+            ...mappedBooking,
+            oppositeParty,
+          };
+        }),
         totalItems,
         totalPages,
         pageNumber,

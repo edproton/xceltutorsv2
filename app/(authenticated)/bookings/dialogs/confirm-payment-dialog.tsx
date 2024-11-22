@@ -7,20 +7,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import { CreditCard, Clock } from "lucide-react";
-
-interface ConfirmPaymentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  booking: GetBookingsWithPaginationQueryResponseItem;
-}
+import { DialogProps } from "../item/dialog-options";
 
 export default function ConfirmPaymentDialog({
   open,
   onOpenChange,
-}: ConfirmPaymentDialogProps) {
+}: DialogProps) {
   const handleConfirmAndPayLater = () => {
     onOpenChange(false);
   };

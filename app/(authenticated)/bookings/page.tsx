@@ -62,7 +62,7 @@ export default async function BookingsPage() {
   return (
     <div className="container mx-auto px-4">
       <Bookings
-        bookings={getBookingsQuery.bookings.items}
+        initialBookings={getBookingsQuery.bookings.items}
         role={role}
         oppositeParty={oppositeParty}
       />

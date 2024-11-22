@@ -9,28 +9,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile } from "@/lib/types";
 import { DateTime } from "luxon";
-
-interface ConfirmationDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: Profile;
-  onSendConfirmation?: (message: string) => void;
-  onCancel?: (reason: string) => void; // Add this line
-}
+import { DialogProps } from "../item/dialog-options";
 
 export default function ConfirmationDialog({
   open,
   onOpenChange,
   booking,
-  oppositeParty,
-  onSendConfirmation,
-}: ConfirmationDialogProps) {
+}: DialogProps) {
   const [message, setMessage] = useState(
-    `Dear ${oppositeParty.name},
+    `Dear ${booking.oppositeParty.name},
 
 👋 This is a confirmation for our upcoming lesson on ${booking.subject.name} ${
       booking.subject.level.name
@@ -44,10 +32,6 @@ I look forward to our session! Thank you! ✅`
   );
 
   const handleSendConfirmation = () => {
-    if (onSendConfirmation) {
-      onSendConfirmation(message);
-    }
-
     onOpenChange(false);
   };
 

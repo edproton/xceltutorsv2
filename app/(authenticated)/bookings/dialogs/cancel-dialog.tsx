@@ -11,33 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import * as React from "react";
 import { DateTime } from "luxon";
-import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile } from "@/lib/types";
-
-interface CancelDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: Profile;
-  onCancel?: (reason: string) => void;
-  onSendConfirmation?: (message: string) => void; // Add this line
-}
+import { DialogProps } from "../item/dialog-options";
 
 export default function CancelDialog({
   open,
   onOpenChange,
   booking,
-  onCancel,
-  oppositeParty,
-}: CancelDialogProps) {
+}: DialogProps) {
   const [reason, setReason] = React.useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (onCancel) {
-      onCancel(reason);
-    }
 
     onOpenChange(false);
   };
@@ -54,7 +38,7 @@ export default function CancelDialog({
           <CardContent className="pt-6">
             <h2 className="text-lg font-medium mb-2">Lesson details</h2>
             <p className="text-sm text-muted-foreground">
-              {oppositeParty.name}
+              {booking.oppositeParty.name}
             </p>
             <p className="text-sm text-muted-foreground">
               {booking.subject.name}
@@ -72,7 +56,7 @@ export default function CancelDialog({
               <Label htmlFor="reason">Reason for cancellation</Label>
               <Textarea
                 id="reason"
-                placeholder={`Let ${oppositeParty.name} know why you're cancelling this lesson`}
+                placeholder={`Let ${booking.oppositeParty.name} know why you're cancelling this lesson`}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="min-h-[100px]"

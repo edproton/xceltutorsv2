@@ -6,24 +6,19 @@ import { BookingStatus, Role } from "@/lib/types";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import ConfirmPaymentDialog from "../dialogs/confirm-payment-dialog";
 import TutorConfirmationDialog from "../dialogs/tutor-confirmation-dialog";
+import { DialogProps } from "./dialog-options";
 
 interface QuickActionButtonProps {
   role: Role;
   status: BookingStatus;
   booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: {
-    name: string;
-  };
-  onActionComplete: (
-    booking: GetBookingsWithPaginationQueryResponseItem
-  ) => void;
 }
 
 interface QuickAction {
   roles: Role[];
   status: BookingStatus[];
   action: string;
-  dialog: React.ComponentType<any>;
+  dialog: React.ComponentType<DialogProps>;
 }
 
 export const quickActions: QuickAction[] = [
@@ -45,8 +40,6 @@ export function QuickActionButton({
   role,
   status,
   booking,
-  oppositeParty,
-  onActionComplete,
 }: QuickActionButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -62,13 +55,6 @@ export function QuickActionButton({
     setIsDialogOpen(true);
   };
 
-  const handleConfirm = () => {
-    // Implement the confirmation logic here
-    console.log(`Confirmed ${action.action} for booking:`, booking.id);
-    setIsDialogOpen(false);
-    onActionComplete(booking);
-  };
-
   const DialogComponent = action.dialog;
 
   return (
@@ -78,8 +64,6 @@ export function QuickActionButton({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         booking={booking}
-        oppositeParty={oppositeParty}
-        onConfirm={handleConfirm}
       />
     </>
   );

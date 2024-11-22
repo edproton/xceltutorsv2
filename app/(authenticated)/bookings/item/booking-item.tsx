@@ -9,35 +9,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Profile, Role } from "@/lib/types";
-import { DialogOption } from "./dialog-options"; // Keep this line
+import { Role } from "@/lib/types";
+import { DialogOption } from "./dialog-options";
 import { QuickActionButton } from "./quick-action-button";
 import { BookingStatusBadge } from "./booking-status-badge";
 
 interface BookingItemProps {
   booking: GetBookingsWithPaginationQueryResponseItem;
-  oppositeParty: Profile;
   role: Role;
   onOpenDialog: (
     booking: GetBookingsWithPaginationQueryResponseItem,
     dialog: DialogOption
-  ) => void;
-  onConfirmPayment: (
-    booking: GetBookingsWithPaginationQueryResponseItem
-  ) => void;
-  onConfirmSchedule: (
-    booking: GetBookingsWithPaginationQueryResponseItem
   ) => void;
   dialogOptions: DialogOption[];
 }
 
 export function BookingItem({
   booking,
-  oppositeParty,
   role,
   onOpenDialog,
-  onConfirmPayment,
-  onConfirmSchedule,
   dialogOptions,
 }: BookingItemProps) {
   const availableDialogOptions = dialogOptions.filter(
@@ -45,6 +35,9 @@ export function BookingItem({
       option.roles.includes(role) &&
       (!option.status || option.status.includes(booking.status))
   );
+
+  const oppositeParty =
+    role === "student" ? booking.forTutor : booking.createdBy;
 
   return (
     <div className="flex items-center justify-between rounded-lg border p-4">
@@ -78,14 +71,6 @@ export function BookingItem({
           role={role}
           status={booking.status}
           booking={booking}
-          oppositeParty={oppositeParty}
-          onActionComplete={(booking) => {
-            if (booking.status === "AwaitingPayment") {
-              onConfirmPayment(booking);
-            } else if (booking.status === "AwaitingTutorConfirmation") {
-              onConfirmSchedule(booking);
-            }
-          }}
         />
         {availableDialogOptions.length > 0 && (
           <DropdownMenu>
