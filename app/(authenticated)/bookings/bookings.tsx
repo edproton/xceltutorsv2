@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { DateTime } from "luxon";
 import {
   Select,
@@ -10,9 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog } from "@/components/ui/dialog";
 import { Profile, Role, BookingStatus } from "@/lib/types";
 import { BookingItem } from "./item/booking-item";
-import { DialogOption } from "./dropdown-options-dialogs";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
 import {
   initializeBookingsStore,
@@ -26,23 +26,12 @@ interface BookingsProps {
 }
 
 export default function Bookings({ initialBookings, role }: BookingsProps) {
-  const { bookings, statusFilter, setStatusFilter } = useBookingsStore();
+  const { bookings, statusFilter, setStatusFilter, openDialog, setOpenDialog } =
+    useBookingsStore();
 
   useEffect(() => {
-    initializeBookingsStore(initialBookings);
-  }, [initialBookings]);
-
-  const [openDialog, setOpenDialog] = useState<DialogOption | null>(null);
-  const [selectedBooking, setSelectedBooking] =
-    useState<GetBookingsWithPaginationQueryResponseItem | null>(null);
-
-  const handleOpenDialog = (
-    booking: GetBookingsWithPaginationQueryResponseItem,
-    dialog: DialogOption
-  ) => {
-    setSelectedBooking(booking);
-    setOpenDialog(dialog);
-  };
+    initializeBookingsStore(initialBookings, role);
+  }, [initialBookings, role]);
 
   const filteredBookings =
     statusFilter === "all"
@@ -93,12 +82,7 @@ export default function Bookings({ initialBookings, role }: BookingsProps) {
                 <h2 className="text-lg font-semibold">{group}</h2>
                 <div className="space-y-4">
                   {groupBookings.map((booking) => (
-                    <BookingItem
-                      key={booking.id}
-                      booking={booking}
-                      role={role}
-                      onOpenDialog={handleOpenDialog}
-                    />
+                    <BookingItem key={booking.id} booking={booking} />
                   ))}
                 </div>
               </div>
@@ -111,12 +95,13 @@ export default function Bookings({ initialBookings, role }: BookingsProps) {
           </TabsContent>
         </Tabs>
       </main>
-      {selectedBooking && openDialog && (
-        <openDialog.component
-          open={!!openDialog}
-          onOpenChange={() => setOpenDialog(null)}
-          booking={selectedBooking}
-        />
+      {openDialog && (
+        <Dialog
+          open={true}
+          onOpenChange={(open) => !open && setOpenDialog(null)}
+        >
+          <openDialog.component />
+        </Dialog>
       )}
     </div>
   );

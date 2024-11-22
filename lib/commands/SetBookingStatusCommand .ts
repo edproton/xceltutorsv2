@@ -3,7 +3,11 @@ import { BookingStatus, ResponseWrapper } from "@/lib/types";
 
 export const validTransitions: Record<BookingStatus, BookingStatus[]> = {
   AwaitingTutorConfirmation: ["AwaitingPayment", "Canceled"],
-  AwaitingStudentConfirmation: ["AwaitingPayment", "Canceled"],
+  AwaitingStudentConfirmation: [
+    "AwaitingTutorConfirmation",
+    "AwaitingPayment",
+    "Canceled",
+  ],
   AwaitingPayment: ["PaymentFailed", "Scheduled", "Canceled"],
   PaymentFailed: ["AwaitingPayment", "Canceled"],
   Scheduled: ["Completed", "Canceled"],

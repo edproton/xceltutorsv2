@@ -9,26 +9,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { Role } from "@/lib/types";
-import { DialogOption, dropdownOptions } from "../dropdown-options-dialogs";
-import { QuickActionButton } from "./quick-action-button";
 import { BookingStatusBadge } from "./booking-status-badge";
+import { useBookingsStore } from "../store/bookingStore";
+import { useDropdownDialogOptions } from "../dropdown-options-dialogs";
+import { QuickAction } from "../quick-options-dialogs";
 
 interface BookingItemProps {
   booking: GetBookingsWithPaginationQueryResponseItem;
-  role: Role;
-  onOpenDialog: (
-    booking: GetBookingsWithPaginationQueryResponseItem,
-    dialog: DialogOption
-  ) => void;
 }
 
-export function BookingItem({ booking, role, onOpenDialog }: BookingItemProps) {
-  const availableDialogOptions = dropdownOptions.filter(
-    (option) =>
-      option.roles.includes(role) &&
-      (!option.status || option.status.includes(booking.status))
-  );
+export function BookingItem({ booking }: BookingItemProps) {
+  const { role } = useBookingsStore();
+  const { availableDialogOptions, handleOpenDialog } =
+    useDropdownDialogOptions(booking);
 
   const oppositeParty =
     role === "student" ? booking.forTutor : booking.createdBy;
@@ -61,7 +54,7 @@ export function BookingItem({ booking, role, onOpenDialog }: BookingItemProps) {
           {booking.subject.name} {booking.subject.level.name}
         </span>
         <BookingStatusBadge status={booking.status} />
-        <QuickActionButton role={role} booking={booking} />
+        <QuickAction booking={booking} />
         {availableDialogOptions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -74,7 +67,7 @@ export function BookingItem({ booking, role, onOpenDialog }: BookingItemProps) {
               {availableDialogOptions.map((option) => (
                 <DropdownMenuItem
                   key={option.label}
-                  onSelect={() => onOpenDialog(booking, option)}
+                  onSelect={() => handleOpenDialog(option)}
                 >
                   {option.label}
                 </DropdownMenuItem>

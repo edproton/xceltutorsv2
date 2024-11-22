@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -11,17 +10,15 @@ import { CalendarIcon, CheckCircle } from "lucide-react";
 import { tutorConfirmationBookingQuery } from "../actions";
 import { toast } from "@/hooks/use-toast";
 import { useBookingsStore } from "../store/bookingStore";
-import { DialogProps } from "../dropdown-options-dialogs";
 
-export default function TutorConfirmationDialog({
-  open,
-  onOpenChange,
-  booking,
-}: DialogProps) {
-  const updateBooking = useBookingsStore((state) => state.updateBooking);
+export default function TutorConfirmationDialog() {
+  const { selectedBooking, setOpenDialog, updateBooking } = useBookingsStore();
+
   const handleConfirm = async () => {
+    if (!selectedBooking) return;
+
     const result = await tutorConfirmationBookingQuery({
-      bookingId: booking.id,
+      bookingId: selectedBooking.id,
     });
 
     if (result?.serverError) {
@@ -33,41 +30,41 @@ export default function TutorConfirmationDialog({
     } else {
       toast({
         title: "Schedule Confirmed",
-        description: `You have successfully confirmed the lesson with ${booking.createdBy.name}.`,
+        description: `You have successfully confirmed the lesson with ${selectedBooking.createdBy.name}.`,
         variant: "success",
       });
 
-      updateBooking(booking.id, { status: "AwaitingPayment" });
+      updateBooking(selectedBooking.id, { status: "AwaitingPayment" });
     }
 
-    onOpenChange(false);
+    setOpenDialog(null);
   };
 
+  if (!selectedBooking) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            Confirm Schedule with {booking.forTutor.name}
-          </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to confirm this lesson schedule?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center gap-2 py-4">
-          <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-          <span>{booking.endTime}</span>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} variant="success">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Confirm Schedule
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>
+          Confirm Schedule with {selectedBooking.createdBy.name}
+        </DialogTitle>
+        <DialogDescription>
+          Are you sure you want to confirm this lesson schedule?
+        </DialogDescription>
+      </DialogHeader>
+      <div className="flex items-center gap-2 py-4">
+        <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+        <span>{selectedBooking.startTime}</span>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => setOpenDialog(null)}>
+          Cancel
+        </Button>
+        <Button onClick={handleConfirm} variant="success">
+          <CheckCircle className="mr-2 h-4 w-4" />
+          Confirm Schedule
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   );
 }

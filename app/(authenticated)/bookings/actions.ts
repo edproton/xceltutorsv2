@@ -42,7 +42,7 @@ export const studentConfirmationBookingQuery = actionClient
     // The tutor is the one that is available to confirm the booking.
     const setBookingStatusCommand = await SetBookingStatusCommand.execute(
       parsedInput.bookingId,
-      "AwaitingStudentConfirmation"
+      "AwaitingTutorConfirmation"
     );
 
     if (setBookingStatusCommand.error) {

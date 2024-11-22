@@ -1,23 +1,11 @@
-import { BookingStatus, Role } from "@/lib/types";
-import CancelDialog from "./cancel-dialog";
 import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import ResendConfirmationMessageDialog from "./resend-confirmation-message-dialog";
 import RescheduleDialog from "./reschedule-dialog";
+import { useBookingsStore } from "../store/bookingStore";
+import CancelDialog from "./cancel-dialog";
+import ResendConfirmationMessageDialog from "./resend-confirmation-message-dialog";
+import { DialogOption } from "../types";
 
-export interface DialogOption {
-  label: string;
-  component: React.ComponentType<DialogProps>;
-  roles: Role[];
-  status?: BookingStatus[];
-}
-
-export interface DialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  booking: GetBookingsWithPaginationQueryResponseItem;
-}
-
-export const dropdownOptions: DialogOption[] = [
+export const dropdownDialogOptions: DialogOption[] = [
   {
     label: "Reschedule lesson",
     component: RescheduleDialog,
@@ -48,3 +36,21 @@ export const dropdownOptions: DialogOption[] = [
     status: ["AwaitingStudentConfirmation", "AwaitingPayment"],
   },
 ];
+
+export function useDropdownDialogOptions(
+  booking: GetBookingsWithPaginationQueryResponseItem
+) {
+  const { role, setOpenDialog, setSelectedBooking } = useBookingsStore();
+
+  const availableDialogOptions = dropdownDialogOptions.filter(
+    (option) =>
+      option.roles.includes(role) && option.status.includes(booking.status)
+  );
+
+  const handleOpenDialog = (option: DialogOption) => {
+    setSelectedBooking(booking);
+    setOpenDialog(option);
+  };
+
+  return { availableDialogOptions, handleOpenDialog };
+}
