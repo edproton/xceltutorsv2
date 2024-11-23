@@ -187,7 +187,7 @@ export const GET = async (request: Request) => {
       );
     }
 
-    const redirectUrl = getRedirectUrl("/bookings");
+    const redirectUrl = await getRedirectUrl("/bookings");
 
     // Redirect to the bookings page
     return NextResponse.redirect(redirectUrl);

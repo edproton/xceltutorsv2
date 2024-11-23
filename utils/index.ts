@@ -1,18 +1,18 @@
 import env from "@/env";
+import { headers } from "next/headers";
 
-export function getRedirectUrl(path: string): URL {
-  // Get the current origin
-  const currentOrigin =
-    typeof window !== "undefined" ? window.location.origin : null;
+export async function getRedirectUrl(path: string): Promise<URL> {
+  const headersList = await headers();
+  const origin = headersList.get("origin");
 
-  // Find the matching domain from NEXT_PUBLIC_APP_URL
   const matchingDomain = env.NEXT_PUBLIC_APP_URL.find((domain) =>
-    currentOrigin ? currentOrigin.startsWith(domain) : false
+    origin ? origin.startsWith(domain) : false
   );
 
-  // If no matching domain is found, use the first domain in the array
-  const baseUrl = matchingDomain || env.NEXT_PUBLIC_APP_URL[0];
+  if (!matchingDomain) {
+    console.error("Invalid origin:", origin);
+    throw new Error("Invalid origin");
+  }
 
-  // Construct the full URL
-  return new URL(path, baseUrl);
+  return new URL(path, matchingDomain);
 }
