@@ -4,7 +4,7 @@ import { GetCurrentUserQuery } from "@/lib/queries/shared/GetCurrentUserQuery";
 import { z } from "zod";
 import { GetBookingByIdQuery } from "@/lib/queries/GetBookingByIdQuery";
 import { SetBookingStatusCommand } from "@/lib/commands/SetBookingStatusCommand ";
-import env from "@/env";
+import { getRedirectUrl } from "@/utils";
 
 const paymentSchema = z.object({
   bookingId: z.coerce.number(),
@@ -187,7 +187,7 @@ export const GET = async (request: Request) => {
       );
     }
 
-    const redirectUrl = new URL("/bookings", env.NEXT_PUBLIC_APP_URL);
+    const redirectUrl = getRedirectUrl("/bookings");
 
     // Redirect to the bookings page
     return NextResponse.redirect(redirectUrl);

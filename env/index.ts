@@ -7,7 +7,10 @@ const env = createEnv({
     STRIPE_SECRET_KEY: z.string().min(1),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().min(1),
+    NEXT_PUBLIC_APP_URL: z
+      .string()
+      .min(1, "Environment variable must not be empty")
+      .transform((value) => value.split(",").map((domain) => domain.trim())),
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
