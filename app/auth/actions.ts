@@ -9,7 +9,7 @@ export async function signInWithOAuth(formData: FormData) {
   const provider = formData.get("provider") as Provider;
   const client = await createClient();
 
-  const redirectUrl = getRedirectUrl("/auth/callback");
+  const redirectUrl = await getRedirectUrl("/auth/callback");
   const { data, error } = await client.auth.signInWithOAuth({
     provider,
     options: {
