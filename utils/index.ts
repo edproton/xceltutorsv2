@@ -11,12 +11,19 @@ export async function getRedirectUrl(path: string): Promise<URL> {
     host: headersList.get("host"),
   });
 
-  const origin =
+  const rawOrigin =
     headersList.get("origin") ||
     headersList.get("x-forwarded-host") ||
     headersList.get("host");
 
-  console.log("Resolved origin:", origin);
+  if (!rawOrigin) {
+    console.error("No origin found in headers");
+    throw new Error("Missing origin header");
+  }
+
+  // Normalize the origin to remove http:// or https://
+  const origin = rawOrigin.replace(/^https?:\/\//, "").trim();
+  console.log("Normalized origin:", origin);
 
   const prefix = env.NODE_ENV === "development" ? "http://" : "https://";
   console.log("Environment and prefix:", {
@@ -28,8 +35,11 @@ export async function getRedirectUrl(path: string): Promise<URL> {
 
   // Find a matching domain in the NEXT_PUBLIC_APP_URL array
   const matchingDomain = env.NEXT_PUBLIC_APP_URL.find((domain) => {
-    const matches = domain.includes(`${prefix}${origin}`);
-    console.log(`Checking domain: ${domain} | Matches: ${matches}`);
+    const normalizedDomain = domain.replace(/^https?:\/\//, "").trim();
+    const matches = normalizedDomain.includes(origin);
+    console.log(
+      `Checking domain: ${domain} | Normalized: ${normalizedDomain} | Matches: ${matches}`
+    );
     return matches;
   });
 
