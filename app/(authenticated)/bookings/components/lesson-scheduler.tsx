@@ -17,7 +17,6 @@ import { GetBookingsWithPaginationQueryResponseItem } from "@/lib/queries/GetBoo
 import { useDialog } from "@/contexts/dialog-context";
 import { useBookingStore } from "../store/booking-store";
 import {
-  RescheduleDialog,
   CancelDialog,
   FeedbackDialog,
   ConfirmLessonDialog,
@@ -30,6 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { RescheduleDialog } from "./reschedule-dialog";
 
 export type Role = "tutor" | "student";
 

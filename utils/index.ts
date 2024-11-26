@@ -14,6 +14,8 @@ export async function getRedirectUrl(path: string): Promise<URL> {
     domain.includes(`${prefix}${origin}`)
   );
 
+  console.log(prefix);
+
   if (!matchingDomain) {
     console.error("Invalid origin:", origin);
     throw new Error("Invalid origin");

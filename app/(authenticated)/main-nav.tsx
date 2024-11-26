@@ -66,10 +66,6 @@ export default function MainNav({ user }: MainNavProps) {
       href: "/payments",
       label: "Payments",
     },
-    {
-      href: "/refer",
-      label: "Refer a friend",
-    },
   ];
 
   const filteredRoutes = routes.filter((route) => {

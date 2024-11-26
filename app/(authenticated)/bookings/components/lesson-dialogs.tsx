@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -10,43 +9,6 @@ import { CreditCard } from "lucide-react";
 import { useBookingStore } from "../store/booking-store";
 import { tutorConfirmationBookingQuery } from "../actions";
 import { Role } from "@/lib/types";
-
-export const RescheduleDialog: React.FC = () => {
-  const { toast } = useToast();
-  const { closeDialog } = useDialog();
-
-  return (
-    <div className="space-y-4">
-      <DialogHeader>
-        <DialogTitle>Reschedule Lesson</DialogTitle>
-      </DialogHeader>
-      <div className="grid gap-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="new-date" className="text-right">
-            New Date
-          </Label>
-          <Input id="new-date" type="datetime-local" className="col-span-3" />
-        </div>
-      </div>
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={closeDialog}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() => {
-            toast({
-              title: "Lesson Rescheduled",
-              description: "The lesson has been rescheduled.",
-            });
-            closeDialog();
-          }}
-        >
-          Reschedule
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 export const CancelDialog: React.FC = () => {
   const { toast } = useToast();
