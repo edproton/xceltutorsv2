@@ -1,5 +1,6 @@
 import { db } from "@/lib/database";
 import { BookingStatus, ResponseWrapper } from "@/lib/types";
+import { DateTime } from "luxon";
 
 export const validTransitions: Record<BookingStatus, BookingStatus[]> = {
   TutorRequestedReschedule: ["AwaitingStudentConfirmation", "Canceled"],
@@ -57,7 +58,7 @@ export class SetBookingStatusCommand {
         .updateTable("bookings")
         .set({
           status: status,
-          updatedAt: new Date(),
+          updatedAt: DateTime.utc().toISO(),
         })
         .where("id", "=", bookingId)
         .execute();
