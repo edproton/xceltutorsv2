@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, AlertCircle, Clock, X, MoreVertical } from "lucide-react";
+import { Check, AlertCircle, Clock, X, MoreVertical, Info } from "lucide-react";
 import { DateTime } from "luxon";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,6 +24,12 @@ import {
   PaymentDialog,
 } from "./lesson-dialogs";
 import React from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type Role = "tutor" | "student";
 
@@ -64,7 +70,13 @@ function getStatusBadgeStyle(status: BookingStatus): string {
     case "Scheduled":
       return "bg-green-100 text-green-800 hover:bg-green-200";
     case "AwaitingTutorConfirmation":
+      return "bg-orange-100 text-orange-800 hover:bg-orange-200";
     case "AwaitingStudentConfirmation":
+      return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+    case "TutorRequestedReschedule":
+      return "bg-teal-100 text-teal-800 hover:bg-teal-200";
+    case "StudentRequestedReschedule":
+      return "bg-indigo-100 text-indigo-800 hover:bg-indigo-200";
     case "AwaitingPayment":
       return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
     case "PaymentFailed":
@@ -88,6 +100,9 @@ function LessonCard({
 
   const startTime = DateTime.fromISO(booking.startTime);
   const endTime = DateTime.fromISO(booking.endTime);
+  const now = DateTime.now();
+  const isWithin15Minutes =
+    startTime.diff(now).as("minutes") <= 15 && startTime > now;
 
   const handleReschedule = () => {
     setSelectedBooking(booking);
@@ -108,13 +123,36 @@ function LessonCard({
     switch (booking.status) {
       case "Scheduled":
         return (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => (window.location.href = "/lesson-room")}
-          >
-            Launch
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => (window.location.href = "/lesson-room")}
+                    disabled={!isWithin15Minutes}
+                  >
+                    Launch <Info />
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {isWithin15Minutes
+                    ? "Click to join the lesson"
+                    : `Lesson can be launched at ${startTime
+                        .minus({ minutes: 15 })
+                        .toFormat("HH:mm")}`}
+                </p>
+                <p className="mt-2">
+                  Lessons can be accessed 15 minutes before the scheduled start
+                  time. Make sure you have a stable internet connection and your
+                  device is ready for the session.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       case "AwaitingTutorConfirmation":
         return role === "tutor" ? (

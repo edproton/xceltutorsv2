@@ -66,13 +66,15 @@ export interface TutorMetadata {
 }
 
 export type BookingStatus =
-  | "AwaitingTutorConfirmation" // The tutor needs to confirm their availability.
-  | "AwaitingStudentConfirmation" // The student needs to confirm and pay.
-  | "AwaitingPayment" // The payment is pending.
+  | "AwaitingTutorConfirmation" // Waiting for tutor to confirm reschedule.
+  | "AwaitingStudentConfirmation" // Waiting for student to confirm reschedule.
+  | "TutorRequestedReschedule" // Tutor initiated a reschedule request.
+  | "StudentRequestedReschedule" // Student initiated a reschedule request.
+  | "AwaitingPayment" // Payment is pending.
   | "PaymentFailed" // Payment attempt failed.
-  | "Scheduled" // Booking is confirmed, scheduled for the agreed date and time.
+  | "Scheduled" // Booking is confirmed and scheduled.
   | "Canceled" // Booking was canceled.
-  | "Completed"; // Booking has been completed.
+  | "Completed"; // Booking completed.
 
 export type BookingType = "Free Meeting" | "Lesson";
 

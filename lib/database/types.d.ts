@@ -15,7 +15,7 @@ export type AuthFactorType = "phone" | "totp" | "webauthn";
 
 export type AuthOneTimeTokenType = "confirmation_token" | "email_change_token_current" | "email_change_token_new" | "phone_change_token" | "reauthentication_token" | "recovery_token";
 
-export type BookingStatus = "AwaitingPayment" | "AwaitingStudentConfirmation" | "AwaitingTutorConfirmation" | "Canceled" | "Completed" | "PaymentFailed" | "Scheduled";
+export type BookingStatus = "AwaitingPayment" | "AwaitingStudentConfirmation" | "AwaitingTutorConfirmation" | "Canceled" | "Completed" | "PaymentFailed" | "Scheduled" | "StudentRequestedReschedule" | "TutorRequestedReschedule";
 
 export type BookingType = "Free Meeting" | "Group Lesson" | "Lesson";
 

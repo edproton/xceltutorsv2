@@ -2,15 +2,27 @@ import { db } from "@/lib/database";
 import { BookingStatus, ResponseWrapper } from "@/lib/types";
 
 export const validTransitions: Record<BookingStatus, BookingStatus[]> = {
-  AwaitingTutorConfirmation: ["AwaitingPayment", "Canceled"],
+  TutorRequestedReschedule: ["AwaitingStudentConfirmation", "Canceled"],
+  StudentRequestedReschedule: ["AwaitingTutorConfirmation", "Canceled"],
+  AwaitingTutorConfirmation: [
+    "TutorRequestedReschedule",
+    "AwaitingPayment",
+    "Canceled",
+  ],
   AwaitingStudentConfirmation: [
+    "StudentRequestedReschedule",
     "AwaitingTutorConfirmation",
     "AwaitingPayment",
     "Canceled",
   ],
   AwaitingPayment: ["PaymentFailed", "Scheduled", "Canceled"],
   PaymentFailed: ["AwaitingPayment", "Canceled"],
-  Scheduled: ["Completed", "Canceled"],
+  Scheduled: [
+    "TutorRequestedReschedule",
+    "StudentRequestedReschedule",
+    "Completed",
+    "Canceled",
+  ],
   Canceled: [],
   Completed: [],
 };
