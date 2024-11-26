@@ -2,20 +2,20 @@
 
 import { SetBookingStatusCommand } from "@/lib/commands/SetBookingStatusCommand ";
 import { GetBookingsWithPaginationQuery } from "@/lib/queries/GetBookingsWithPaginationQuery";
-import { GetUserFromSupabaseQuery } from "@/lib/queries/GetUserFromSupabase";
 import { GetUserProfileQuery } from "@/lib/queries/GetUserProfileQuery";
+import { GetCurrentUserQuery } from "@/lib/queries/shared/GetCurrentUserQuery";
 import { actionClient, ResultError } from "@/lib/safe-action";
 import { z } from "zod";
 
 export const getBookingsWithPaginationQuery = async () => {
-  const getAuthenticatedUserQuery = await GetUserFromSupabaseQuery.execute();
+  const getAuthenticatedUserQuery = await GetCurrentUserQuery.execute();
 
   if (getAuthenticatedUserQuery.error) {
     throw new ResultError(getAuthenticatedUserQuery.error);
   }
 
   const getUserProfileQuery = await GetUserProfileQuery.execute(
-    getAuthenticatedUserQuery.data.user.id
+    getAuthenticatedUserQuery.data.id
   );
 
   if (getUserProfileQuery.error) {
@@ -27,7 +27,7 @@ export const getBookingsWithPaginationQuery = async () => {
 
   return {
     bookings: getBookingsWithPaginationQuery.data,
-    userId: getAuthenticatedUserQuery.data.user.id,
+    currentUser: getAuthenticatedUserQuery.data,
   };
 };
 
@@ -43,6 +43,25 @@ export const studentConfirmationBookingQuery = actionClient
     const setBookingStatusCommand = await SetBookingStatusCommand.execute(
       parsedInput.bookingId,
       "AwaitingTutorConfirmation"
+    );
+
+    if (setBookingStatusCommand.error) {
+      throw new ResultError(setBookingStatusCommand.error);
+    }
+  });
+
+export const rescheduleBookingQuery = actionClient
+  .schema(confirmBookingQuerySchema)
+  .action(async ({ parsedInput }) => {
+    const currentUser = await GetCurrentUserQuery.execute();
+    const status =
+      currentUser.data.role === "tutor"
+        ? "AwaitingStudentConfirmation"
+        : "AwaitingTutorConfirmation";
+
+    const setBookingStatusCommand = await SetBookingStatusCommand.execute(
+      parsedInput.bookingId,
+      status
     );
 
     if (setBookingStatusCommand.error) {
