@@ -5,6 +5,7 @@ import { GetBookingsWithPaginationQuery } from "@/lib/queries/GetBookingsWithPag
 import { GetUserProfileQuery } from "@/lib/queries/GetUserProfileQuery";
 import { GetCurrentUserQuery } from "@/lib/queries/shared/GetCurrentUserQuery";
 import { actionClient, ResultError } from "@/lib/safe-action";
+import { BookingStatus } from "@/lib/types";
 import { z } from "zod";
 
 export const getBookingsWithPaginationQuery = async () => {
@@ -54,10 +55,10 @@ export const rescheduleBookingQuery = actionClient
   .schema(confirmBookingQuerySchema)
   .action(async ({ parsedInput }) => {
     const currentUser = await GetCurrentUserQuery.execute();
-    const status =
+    const status: BookingStatus =
       currentUser.data.role === "tutor"
-        ? "AwaitingStudentConfirmation"
-        : "AwaitingTutorConfirmation";
+        ? "TutorRequestedReschedule"
+        : "StudentRequestedReschedule";
 
     const setBookingStatusCommand = await SetBookingStatusCommand.execute(
       parsedInput.bookingId,
